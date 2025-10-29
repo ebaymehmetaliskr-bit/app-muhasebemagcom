@@ -1,0 +1,5 @@
+{
+  "name": "Vergi ve Finansal Analiz AI",
+  "description": "An AI-powered dashboard for financial analysis of corporate tax returns. Upload a PDF to automatically generate trial balances, balance sheets, income statements, and various financial and tax analyses, presented through an intuitive and visually rich interface.",
+  "requestFramePermissions": []
+}
