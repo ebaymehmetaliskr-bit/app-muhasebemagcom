@@ -6,6 +6,14 @@ interface LandingPageProps {
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
+    const handleScroll = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
+        e.preventDefault();
+        const element = document.querySelector(targetId);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
+
     return (
 <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-[#0D1117] text-[#E6EDF3] antialiased">
 <header className="sticky top-0 z-50 flex items-center justify-center border-b border-solid border-gray-800/80 bg-[#0D1117]/80 backdrop-blur-md">
@@ -26,10 +34,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
 </a>
 <div className="hidden md:flex flex-1 justify-end items-center gap-8">
 <div className="flex items-center gap-8">
-<a className="text-gray-400 hover:text-white text-sm font-medium transition-colors" href="#features">Özellikler</a>
-<a className="text-gray-400 hover:text-white text-sm font-medium transition-colors" href="#howitworks">Nasıl Çalışır</a>
-<a className="text-gray-400 hover:text-white text-sm font-medium transition-colors" href="#testimonials">Referanslar</a>
-<a className="text-gray-400 hover:text-white text-sm font-medium transition-colors" href="#faq">SSS</a>
+<a onClick={(e) => handleScroll(e, '#features')} className="text-gray-400 hover:text-white text-sm font-medium transition-colors" href="#features">Özellikler</a>
+<a onClick={(e) => handleScroll(e, '#howitworks')} className="text-gray-400 hover:text-white text-sm font-medium transition-colors" href="#howitworks">Nasıl Çalışır</a>
+<a onClick={(e) => handleScroll(e, '#testimonials')} className="text-gray-400 hover:text-white text-sm font-medium transition-colors" href="#testimonials">Referanslar</a>
+<a onClick={(e) => handleScroll(e, '#faq')} className="text-gray-400 hover:text-white text-sm font-medium transition-colors" href="#faq">SSS</a>
 </div>
 <div className="flex gap-2">
 <button onClick={() => onNavigate('login')} className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-5 bg-gray-800 text-foreground-dark text-sm font-bold leading-normal tracking-[0.015em] hover:bg-gray-700 transition-colors">
@@ -62,7 +70,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
 </div>
 </div>
 <div className="mt-16">
-<img alt="Abstract 3D rendering of data blocks and charts, symbolizing AI analysis." className="rounded-xl w-full h-auto object-cover aspect-video shadow-2xl shadow-gray-900/20" loading="lazy" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwjxN5foFS6fAsWoxZjPOMwHApQDednVsKjHVBk-vsz65YSyJHJ-KOQ8wHxqhn-PIMLj3af8V17qdHazrF8s1GEdgbpyDOuKAgmTkKMuIm7a6o8H_l7YFu5FmDq0aw_kXztTHgwO8xCJ22mRBGQuKo1JJ5ltdckSsoZB1QvUSRp51FGIZcDIpn1f-ZLzTTfomq2Y0KJAOgKNg_qu-CzJBp7NPcY0ZUJpzpSL3u-jY2ohehgMcvurqfSAdi13LVfgatMBnaK-Uvzrg"/>
+<img alt="Yapay zeka analizini simgeleyen veri blokları ve grafiklerin soyut 3D render'ı." className="rounded-xl w-full h-auto object-cover aspect-video shadow-2xl shadow-gray-900/20" loading="lazy" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwjxN5foFS6fAsWoxZjPOMwHApQDednVsKjHVBk-vsz65YSyJHJ-KOQ8wHxqhn-PIMLj3af8V17qdHazrF8s1GEdgbpyDOuKAgmTkKMuIm7a6o8H_l7YFu5FmDq0aw_kXztTHgwO8xCJ22mRBGQuKo1JJ5ltdckSsoZB1QvUSRp51FGIZcDIpn1f-ZLzTTfomq2Y0KJAOgKNg_qu-CzJBp7NPcY0ZUJpzpSL3u-jY2ohehgMcvurqfSAdi13LVfgatMBnaK-Uvzrg"/>
 </div>
 </div>
 </section>
@@ -307,8 +315,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
 <div>
 <h4 className="font-bold text-foreground-dark mb-4">Ürün</h4>
 <ul className="space-y-3">
-<li><a className="text-gray-400 hover:text-white transition-colors" href="#features">Özellikler</a></li>
-<li><a className="text-gray-400 hover:text-white transition-colors" href="#howitworks">Nasıl Çalışır</a></li>
+<li><a onClick={(e) => handleScroll(e, '#features')} className="text-gray-400 hover:text-white transition-colors" href="#features">Özellikler</a></li>
+<li><a onClick={(e) => handleScroll(e, '#howitworks')} className="text-gray-400 hover:text-white transition-colors" href="#howitworks">Nasıl Çalışır</a></li>
 <li><a className="text-gray-400 hover:text-white transition-colors" href="#">Fiyatlandırma</a></li>
 <li><a className="text-gray-400 hover:text-white transition-colors" href="#" onClick={(e) => { e.preventDefault(); onNavigate('demo'); }}>Demo</a></li>
 </ul>
@@ -323,8 +331,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
 <div>
 <h4 className="font-bold text-foreground-dark mb-4">Yasal</h4>
 <ul className="space-y-3">
-<li><a className="text-gray-400 hover:text-white transition-colors" href="#legal">Gizlilik Politikası</a></li>
-<li><a className="text-gray-400 hover:text-white transition-colors" href="#legal">Hizmet Şartları</a></li>
+<li><a onClick={(e) => handleScroll(e, '#legal')} className="text-gray-400 hover:text-white transition-colors" href="#legal">Gizlilik Politikası</a></li>
+<li><a onClick={(e) => handleScroll(e, '#legal')} className="text-gray-400 hover:text-white transition-colors" href="#legal">Hizmet Şartları</a></li>
 </ul>
 </div>
 </div>

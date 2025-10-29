@@ -4,10 +4,11 @@ import { Route } from '../App';
 interface LoginPageProps {
   onNavigate: (route: Route) => void;
   onLoginSuccess: () => void;
+  initialMode?: 'login' | 'signup';
 }
 
-export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, onLoginSuccess }) => {
-    const [isLogin, setIsLogin] = useState(true);
+export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, onLoginSuccess, initialMode = 'login' }) => {
+    const [isLogin, setIsLogin] = useState(initialMode === 'login');
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -27,8 +28,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, onLoginSuccess
                             <span className="text-xl font-bold text-[#0A2A5B] dark:text-white">Vergi ve Finansal Analiz AI</span>
                         </div>
                         <div>
-                            <h1 className="text-[#111418] dark:text-white tracking-light text-[32px] font-bold leading-tight text-left pb-3">Automate Financial Reporting with AI</h1>
-                            <p className="text-[#6B7280] dark:text-gray-300 text-base font-normal leading-normal pb-3 pt-1">Transform tax return PDFs into actionable insights instantly.</p>
+                            <h1 className="text-[#111418] dark:text-white tracking-light text-[32px] font-bold leading-tight text-left pb-3">Yapay Zeka ile Finansal Raporlamayı Otomatikleştirin</h1>
+                            <p className="text-[#6B7280] dark:text-gray-300 text-base font-normal leading-normal pb-3 pt-1">Vergi beyannamesi PDF'lerini anında eyleme geçirilebilir içgörülere dönüştürün.</p>
                         </div>
                         <div className="w-full aspect-square bg-center bg-no-repeat bg-cover rounded-xl" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuB2XSTYB6xiNFmRF6HU_yX6L8t2Y4-sj7rbaUT4O0_lgo1k3KDgcDr0PfSJR6lk97jFRXF5DdVb8qNPW61EJSX1P7U9cycATp4aUtKH7s8A46C9s0A7M2794BMx9jmYZcxEkc8vRjc16brPkGYBwWWaXmapSKkJxBjNaqiXBpc5xTQJoh6eI5PLWjgRvnQ-WtFZz1DbrfIo7UOQmC1J925Dcem36ZOk36vZCvpATiaJTte77WGJYrz4j8DE1jLPwjUxJMYoeTxR7CY")' }}></div>
                     </div>
@@ -37,41 +38,41 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, onLoginSuccess
                     <div className="w-full lg:w-3/5 p-8 sm:p-12 flex flex-col justify-center bg-white dark:bg-[#101922]">
                         <div className="flex flex-col max-w-md mx-auto w-full">
                             <div className="flex flex-wrap justify-between gap-3 mb-4">
-                                <p className="text-[#111418] dark:text-white text-4xl font-black leading-tight tracking-[-0.033em] min-w-72">Welcome Back</p>
+                                <p className="text-[#111418] dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">Tekrar Hoş Geldiniz</p>
                             </div>
                             <div className="flex py-3">
                                 <div className="flex h-10 flex-1 items-center justify-center rounded-lg bg-[#f0f2f4] dark:bg-gray-700/50 p-1">
                                     <button onClick={() => setIsLogin(true)} className={`flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 text-sm font-medium leading-normal transition-all ${isLogin ? 'bg-white dark:bg-[#0A2A5B] shadow-[0_0_4px_rgba(0,0,0,0.1)] text-[#111418] dark:text-white' : 'text-[#6B7280] dark:text-gray-300'}`}>
-                                        <span className="truncate">Log In</span>
+                                        <span className="truncate">Giriş Yap</span>
                                     </button>
                                     <button onClick={() => setIsLogin(false)} className={`flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 text-sm font-medium leading-normal transition-all ${!isLogin ? 'bg-white dark:bg-[#0A2A5B] shadow-[0_0_4px_rgba(0,0,0,0.1)] text-[#111418] dark:text-white' : 'text-[#6B7280] dark:text-gray-300'}`}>
-                                        <span className="truncate">Sign Up</span>
+                                        <span className="truncate">Kaydol</span>
                                     </button>
                                 </div>
                             </div>
                             <form className="space-y-6 mt-4" onSubmit={handleSubmit}>
                                 <div>
-                                    <label className="block text-sm font-medium text-muted-gray dark:text-gray-300" htmlFor="email">Email Address</label>
+                                    <label className="block text-sm font-medium text-muted-gray dark:text-gray-300" htmlFor="email">E-posta Adresi</label>
                                     <div className="mt-1">
-                                        <input autoComplete="email" className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700/50 dark:text-white shadow-sm focus:border-[#0A2A5B] focus:ring-[#0A2A5B] sm:text-sm placeholder:text-gray-400" id="email" name="email" placeholder="you@example.com" required type="email" />
+                                        <input autoComplete="email" className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700/50 dark:text-white shadow-sm focus:border-[#0A2A5B] focus:ring-[#0A2A5B] sm:text-sm placeholder:text-gray-400" id="email" name="email" placeholder="siz@ornek.com" type="email" />
                                     </div>
                                 </div>
                                 <div>
                                     <div className="flex items-center justify-between">
-                                        <label className="block text-sm font-medium text-muted-gray dark:text-gray-300" htmlFor="password">Password</label>
-                                        {isLogin && <div className="text-sm"><a className="font-medium text-[#0A2A5B] hover:text-[#0A2A5B]/80" href="#">Forgot Password?</a></div>}
+                                        <label className="block text-sm font-medium text-muted-gray dark:text-gray-300" htmlFor="password">Şifre</label>
+                                        {isLogin && <div className="text-sm"><a className="font-medium text-[#0A2A5B] hover:text-[#0A2A5B]/80" href="#">Şifrenizi mi unuttunuz?</a></div>}
                                     </div>
                                     <div className="mt-1 relative">
-                                        <input autoComplete="current-password" className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700/50 dark:text-white shadow-sm focus:border-[#0A2A5B] focus:ring-[#0A2A5B] sm:text-sm placeholder:text-gray-400" id="password" name="password" placeholder="••••••••" required type="password" />
+                                        <input autoComplete="current-password" className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700/50 dark:text-white shadow-sm focus:border-[#0A2A5B] focus:ring-[#0A2A5B] sm:text-sm placeholder:text-gray-400" id="password" name="password" placeholder="••••••••" type="password" />
                                     </div>
                                 </div>
                                 <div>
-                                    <button className="flex w-full justify-center rounded-lg bg-[#0A2A5B] px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#0A2A5B]/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A2A5B] transition-colors" type="submit">{isLogin ? 'Log In' : 'Sign Up'}</button>
+                                    <button className="flex w-full justify-center rounded-lg bg-[#0A2A5B] px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#0A2A5B]/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A2A5B] transition-colors" type="submit">{isLogin ? 'Giriş Yap' : 'Kaydol'}</button>
                                 </div>
                             </form>
                             <div className="relative my-6">
                                 <div aria-hidden="true" className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-300 dark:border-gray-600"></div></div>
-                                <div className="relative flex justify-center text-sm"><span className="bg-white dark:bg-[#101922] px-2 text-muted-gray dark:text-gray-400">Or continue with</span></div>
+                                <div className="relative flex justify-center text-sm"><span className="bg-white dark:bg-[#101922] px-2 text-muted-gray dark:text-gray-400">Veya şununla devam edin</span></div>
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <button className="flex items-center justify-center gap-3 w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-transparent px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700/50">
@@ -84,7 +85,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, onLoginSuccess
                                 </button>
                             </div>
                             <div className="mt-8 text-center">
-                                <p className="text-xs text-muted-gray dark:text-gray-400">By creating an account, you agree to our <a className="font-medium text-[#0A2A5B] hover:text-[#0A2A5B]/80" href="#">Terms of Service</a> and <a className="font-medium text-[#0A2A5B] hover:text-[#0A2A5B]/80" href="#">Privacy Policy</a>.</p>
+                                <p className="text-xs text-muted-gray dark:text-gray-400">Hesap oluşturarak, <a className="font-medium text-[#0A2A5B] hover:text-[#0A2A5B]/80" href="#">Hizmet Şartlarımızı</a> ve <a className="font-medium text-[#0A2A5B] hover:text-[#0A2A5B]/80" href="#">Gizlilik Politikamızı</a> kabul etmiş olursunuz.</p>
                             </div>
                         </div>
                     </div>

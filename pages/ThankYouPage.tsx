@@ -23,16 +23,16 @@ export const ThankYouPage: React.FC<ThankYouPageProps> = ({ onNavigate }) => {
                     <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[#1173d4]/20 text-[#1173d4]">
                         <span className="material-symbols-outlined !text-5xl">task_alt</span>
                     </div>
-                    <h1 className="text-white text-3xl sm:text-4xl font-bold tracking-tight">Thank You for Your Interest!</h1>
-                    <p className="mt-4 max-w-md text-base text-gray-300">Your request for a demo has been successfully submitted. Our team will review your information and contact you shortly to schedule a time that works for you.</p>
+                    <h1 className="text-white text-3xl sm:text-4xl font-bold tracking-tight">İlginiz İçin Teşekkür Ederiz!</h1>
+                    <p className="mt-4 max-w-md text-base text-gray-300">Demo talebiniz başarıyla gönderildi. Ekibimiz bilgilerinizi inceleyecek ve size uygun bir zaman planlamak için en kısa sürede sizinle iletişime geçecektir.</p>
                     <div className="mt-8">
                         <button onClick={() => onNavigate('landing')} className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-6 bg-[#1173d4] text-white text-base font-bold transition-transform hover:scale-105">
-                            <span className="truncate">Back to Home</span>
+                            <span className="truncate">Ana Sayfaya Dön</span>
                         </button>
                     </div>
                 </div>
                 <div className="mt-8 text-center text-sm text-gray-500">
-                    <p>If you have any urgent questions, please feel free to contact us at <a className="text-[#1173d4] hover:underline" href="mailto:support@finanalysis.ai">support@finanalysis.ai</a></p>
+                    <p>Acil sorularınız varsa, lütfen bizimle <a className="text-[#1173d4] hover:underline" href="mailto:support@finanalysis.ai">support@finanalysis.ai</a> adresinden iletişime geçin.</p>
                 </div>
             </main>
         </div>

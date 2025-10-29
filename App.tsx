@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
@@ -30,13 +31,13 @@ const App: React.FC = () => {
             case 'landing':
                 return <LandingPage onNavigate={handleNavigate} />;
             case 'login':
-                return <LoginPage onNavigate={handleNavigate} onLoginSuccess={handleLogin} />;
+                return <LoginPage onNavigate={handleNavigate} onLoginSuccess={handleLogin} initialMode="login" />;
             case 'demo':
                 return <DemoRequestPage onNavigate={handleNavigate} />;
             case 'thank-you':
                 return <ThankYouPage onNavigate={handleNavigate} />;
             case 'app': // If not authenticated, redirect to login
-                return <LoginPage onNavigate={handleNavigate} onLoginSuccess={handleLogin} />;
+                return <LoginPage onNavigate={handleNavigate} onLoginSuccess={handleLogin} initialMode="signup" />;
             default:
                 return <LandingPage onNavigate={handleNavigate} />;
         }

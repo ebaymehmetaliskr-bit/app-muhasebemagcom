@@ -28,197 +28,155 @@ export const detailedTaxReportSchema = {
 };
 
 
-// Schema for the full analysis data
-export const analysisDataSchema = {
+// --- Schemas for Parallel Analysis ---
+
+export const mizanSchema = {
+    type: Type.ARRAY,
+    items: {
+        type: Type.OBJECT,
+        properties: {
+            hesapKodu: { type: Type.STRING },
+            hesapAdi: { type: Type.STRING },
+            oncekiDonem: { type: Type.NUMBER },
+            cariDonem: { type: Type.NUMBER },
+            isMain: { type: Type.BOOLEAN },
+            isSub: { type: Type.BOOLEAN },
+        },
+        required: ['hesapKodu', 'hesapAdi', 'oncekiDonem', 'cariDonem', 'isMain', 'isSub']
+    }
+};
+
+export const bilancoSchema = {
     type: Type.OBJECT,
     properties: {
-        dashboard: {
+        aktif: {
+            type: Type.ARRAY,
+            items: {
+                type: Type.OBJECT,
+                properties: {
+                    bolumAdi: { type: Type.STRING },
+                    stoklar: {
+                        type: Type.ARRAY,
+                        items: {
+                            type: Type.OBJECT,
+                            properties: {
+                                aciklama: { type: Type.STRING },
+                                oncekiDonem: { type: Type.NUMBER },
+                                cariDonem: { type: Type.NUMBER },
+                            },
+                            required: ['aciklama', 'oncekiDonem', 'cariDonem']
+                        }
+                    }
+                },
+                required: ['bolumAdi', 'stoklar']
+            }
+        },
+        pasif: {
+            type: Type.ARRAY,
+            items: {
+                type: Type.OBJECT,
+                properties: {
+                    bolumAdi: { type: Type.STRING },
+                    stoklar: {
+                        type: Type.ARRAY,
+                        items: {
+                            type: Type.OBJECT,
+                            properties: {
+                                aciklama: { type: Type.STRING },
+                                oncekiDonem: { type: Type.NUMBER },
+                                cariDonem: { type: Type.NUMBER },
+                            },
+                            required: ['aciklama', 'oncekiDonem', 'cariDonem']
+                        }
+                    }
+                },
+                required: ['bolumAdi', 'stoklar']
+            }
+        },
+    },
+    required: ['aktif', 'pasif']
+};
+
+export const gelirGiderSchema = {
+    type: Type.ARRAY,
+    items: {
+        type: Type.OBJECT,
+        properties: {
+            aciklama: { type: Type.STRING },
+            oncekiDonem: { type: Type.NUMBER },
+            cariDonem: { type: Type.NUMBER },
+        },
+        required: ['aciklama', 'oncekiDonem', 'cariDonem']
+    }
+};
+
+export const ratiosSchema = {
+    type: Type.OBJECT,
+    properties: {
+        finansalYapi: {
             type: Type.OBJECT,
             properties: {
-                summary: {
-                    type: Type.OBJECT,
-                    properties: {
-                        mizan: { type: Type.INTEGER },
-                        bilanco: { type: Type.INTEGER },
-                        gelirGider: { type: Type.INTEGER },
-                        analizler: { type: Type.INTEGER },
-                    },
-                    required: ['mizan', 'bilanco', 'gelirGider', 'analizler']
+                title: { type: Type.STRING },
+                ratios: {
+                    type: Type.ARRAY,
+                    items: {
+                        type: Type.OBJECT,
+                        properties: {
+                            name: { type: Type.STRING },
+                            cariDonem: { type: Type.NUMBER },
+                            oncekiDonem: { type: Type.NUMBER },
+                            formula: { type: Type.STRING, description: "Optional formula text." },
+                        },
+                        required: ['name', 'cariDonem', 'oncekiDonem']
+                    }
+                }
+            },
+            required: ['title', 'ratios']
+        },
+        likidite: {
+            type: Type.OBJECT,
+            properties: {
+                title: { type: Type.STRING },
+                ratios: {
+                    type: Type.ARRAY,
+                    items: {
+                        type: Type.OBJECT,
+                        properties: {
+                            name: { type: Type.STRING },
+                            cariDonem: { type: Type.NUMBER },
+                            oncekiDonem: { type: Type.NUMBER },
+                        },
+                        required: ['name', 'cariDonem', 'oncekiDonem']
+                    }
                 },
-                aktifYapi: {
+                dagilim: {
                     type: Type.ARRAY,
                     items: {
                         type: Type.OBJECT,
                         properties: { name: { type: Type.STRING }, value: { type: Type.NUMBER } },
                         required: ['name', 'value']
                     }
-                },
-                pasifYapi: {
-                    type: Type.ARRAY,
-                    items: {
-                        type: Type.OBJECT,
-                        properties: { name: { type: Type.STRING }, value: { type: Type.NUMBER } },
-                        required: ['name', 'value']
-                    }
-                },
+                }
             },
-            required: ['summary', 'aktifYapi', 'pasifYapi']
+            required: ['title', 'ratios', 'dagilim']
         },
-        mizan: {
-            type: Type.ARRAY,
-            items: {
-                type: Type.OBJECT,
-                properties: {
-                    hesapKodu: { type: Type.STRING },
-                    hesapAdi: { type: Type.STRING },
-                    oncekiDonem: { type: Type.NUMBER },
-                    cariDonem: { type: Type.NUMBER },
-                    isMain: { type: Type.BOOLEAN },
-                    isSub: { type: Type.BOOLEAN },
-                },
-                required: ['hesapKodu', 'hesapAdi', 'oncekiDonem', 'cariDonem', 'isMain', 'isSub']
-            }
-        },
-        bilanco: {
+        devirHizlari: {
             type: Type.OBJECT,
             properties: {
-                aktif: {
+                title: { type: Type.STRING },
+                ratios: {
                     type: Type.ARRAY,
                     items: {
                         type: Type.OBJECT,
                         properties: {
-                            bolumAdi: { type: Type.STRING },
-                            stoklar: {
-                                type: Type.ARRAY,
-                                items: {
-                                    type: Type.OBJECT,
-                                    properties: {
-                                        aciklama: { type: Type.STRING },
-                                        oncekiDonem: { type: Type.NUMBER },
-                                        cariDonem: { type: Type.NUMBER },
-                                    },
-                                    required: ['aciklama', 'oncekiDonem', 'cariDonem']
-                                }
-                            }
+                            name: { type: Type.STRING },
+                            cariDonem: { type: Type.NUMBER },
+                            oncekiDonem: { type: Type.NUMBER },
                         },
-                        required: ['bolumAdi', 'stoklar']
+                        required: ['name', 'cariDonem', 'oncekiDonem']
                     }
                 },
-                pasif: {
-                    type: Type.ARRAY,
-                    items: {
-                        type: Type.OBJECT,
-                        properties: {
-                            bolumAdi: { type: Type.STRING },
-                            stoklar: {
-                                type: Type.ARRAY,
-                                items: {
-                                    type: Type.OBJECT,
-                                    properties: {
-                                        aciklama: { type: Type.STRING },
-                                        oncekiDonem: { type: Type.NUMBER },
-                                        cariDonem: { type: Type.NUMBER },
-                                    },
-                                    required: ['aciklama', 'oncekiDonem', 'cariDonem']
-                                }
-                            }
-                        },
-                        required: ['bolumAdi', 'stoklar']
-                    }
-                },
-            },
-            required: ['aktif', 'pasif']
-        },
-        gelirGider: {
-            type: Type.ARRAY,
-            items: {
-                type: Type.OBJECT,
-                properties: {
-                    aciklama: { type: Type.STRING },
-                    oncekiDonem: { type: Type.NUMBER },
-                    cariDonem: { type: Type.NUMBER },
-                },
-                required: ['aciklama', 'oncekiDonem', 'cariDonem']
-            }
-        },
-        rasyolar: {
-            type: Type.OBJECT,
-            properties: {
-                finansalYapi: {
-                    type: Type.OBJECT,
-                    properties: {
-                        title: { type: Type.STRING },
-                        ratios: {
-                            type: Type.ARRAY,
-                            items: {
-                                type: Type.OBJECT,
-                                properties: {
-                                    name: { type: Type.STRING },
-                                    cariDonem: { type: Type.NUMBER },
-                                    oncekiDonem: { type: Type.NUMBER },
-                                    formula: { type: Type.STRING, description: "Optional formula text." },
-                                },
-                                required: ['name', 'cariDonem', 'oncekiDonem']
-                            }
-                        }
-                    },
-                    required: ['title', 'ratios']
-                },
-                likidite: {
-                    type: Type.OBJECT,
-                    properties: {
-                        title: { type: Type.STRING },
-                        ratios: {
-                            type: Type.ARRAY,
-                            items: {
-                                type: Type.OBJECT,
-                                properties: {
-                                    name: { type: Type.STRING },
-                                    cariDonem: { type: Type.NUMBER },
-                                    oncekiDonem: { type: Type.NUMBER },
-                                },
-                                required: ['name', 'cariDonem', 'oncekiDonem']
-                            }
-                        },
-                        dagilim: {
-                            type: Type.ARRAY,
-                            items: {
-                                type: Type.OBJECT,
-                                properties: { name: { type: Type.STRING }, value: { type: Type.NUMBER } },
-                                required: ['name', 'value']
-                            }
-                        }
-                    },
-                    required: ['title', 'ratios', 'dagilim']
-                },
-                devirHizlari: {
-                    type: Type.OBJECT,
-                    properties: {
-                        title: { type: Type.STRING },
-                        ratios: {
-                            type: Type.ARRAY,
-                            items: {
-                                type: Type.OBJECT,
-                                properties: {
-                                    name: { type: Type.STRING },
-                                    cariDonem: { type: Type.NUMBER },
-                                    oncekiDonem: { type: Type.NUMBER },
-                                },
-                                required: ['name', 'cariDonem', 'oncekiDonem']
-                            }
-                        },
-                        karsilastirma: {
-                            type: Type.ARRAY,
-                            items: {
-                                type: Type.OBJECT,
-                                properties: { name: { type: Type.STRING }, 'Cari Dönem': { type: Type.NUMBER }, 'Önceki Dönem': { type: Type.NUMBER } },
-                                required: ['name', 'Cari Dönem', 'Önceki Dönem']
-                            }
-                        }
-                    },
-                    required: ['title', 'ratios', 'karsilastirma']
-                },
-                karlilik: {
+                karsilastirma: {
                     type: Type.ARRAY,
                     items: {
                         type: Type.OBJECT,
@@ -227,115 +185,115 @@ export const analysisDataSchema = {
                     }
                 }
             },
-            required: ['finansalYapi', 'likidite', 'devirHizlari', 'karlilik']
+            required: ['title', 'ratios', 'karsilastirma']
         },
-        vergiselAnaliz: {
+        karlilik: {
+            type: Type.ARRAY,
+            items: {
+                type: Type.OBJECT,
+                properties: { name: { type: Type.STRING }, 'Cari Dönem': { type: Type.NUMBER }, 'Önceki Dönem': { type: Type.NUMBER } },
+                required: ['name', 'Cari Dönem', 'Önceki Dönem']
+            }
+        }
+    },
+    required: ['finansalYapi', 'likidite', 'devirHizlari', 'karlilik']
+};
+
+export const vergiselAnalizSchema = {
+    type: Type.ARRAY,
+    items: {
+        type: Type.OBJECT,
+        properties: {
+            hesapKodlari: { type: Type.ARRAY, items: { type: Type.STRING } },
+            baslik: { type: Type.STRING },
+            kategori: { type: Type.STRING },
+            durum: { type: Type.STRING, enum: ['Evet', 'Hayır'] },
+            aciklama: { type: Type.STRING },
+            uyariMesaji: { type: Type.STRING, description: "Optional warning message." },
+            mevzuatReferanslari: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Optional list of law references." },
+        },
+        required: ['hesapKodlari', 'baslik', 'kategori', 'durum', 'aciklama']
+    }
+};
+
+export const kurganAnalizSchema = {
+    type: Type.OBJECT,
+    properties: {
+        genelRiskDurumu: { type: Type.STRING, enum: ['Düşük', 'Orta', 'Yüksek'] },
+        riskOzeti: { type: Type.STRING },
+        kriterAnalizleri: {
             type: Type.ARRAY,
             items: {
                 type: Type.OBJECT,
                 properties: {
-                    hesapKodlari: { type: Type.ARRAY, items: { type: Type.STRING } },
-                    baslik: { type: Type.STRING },
-                    kategori: { type: Type.STRING },
-                    durum: { type: Type.STRING, enum: ['Evet', 'Hayır'] },
-                    aciklama: { type: Type.STRING },
-                    uyariMesaji: { type: Type.STRING, description: "Optional warning message." },
-                    mevzuatReferanslari: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Optional list of law references." },
+                    kriterAdi: { type: Type.STRING },
+                    riskDurumu: { type: Type.STRING, enum: ['Düşük', 'Orta', 'Yüksek', 'Tespit Edilmedi'] },
+                    analizDetayi: { type: Type.STRING },
+                    ilgiliHesaplar: { type: Type.ARRAY, items: { type: Type.STRING } },
+                    mevzuatReferansi: { type: Type.STRING },
                 },
-                required: ['hesapKodlari', 'baslik', 'kategori', 'durum', 'aciklama']
+                required: ['kriterAdi', 'riskDurumu', 'analizDetayi', 'ilgiliHesaplar', 'mevzuatReferansi']
             }
         },
-        gelirGiderAnalizi: {
-             type: Type.ARRAY,
-             items: {
-                type: Type.OBJECT,
-                properties: { name: { type: Type.STRING }, 'Cari Dönem': { type: Type.NUMBER }, 'Önceki Dönem': { type: Type.NUMBER } },
-                required: ['name', 'Cari Dönem', 'Önceki Dönem']
-             }
-        },
-        kurganAnalizi: {
+        aksiyonOnerileri: { type: Type.ARRAY, items: { type: Type.STRING } },
+    },
+    required: ['genelRiskDurumu', 'riskOzeti', 'kriterAnalizleri', 'aksiyonOnerileri']
+};
+
+export const nakitAkimSchema = {
+    type: Type.OBJECT,
+    properties: {
+        isletme: {
             type: Type.OBJECT,
             properties: {
-                genelRiskDurumu: { type: Type.STRING, enum: ['Düşük', 'Orta', 'Yüksek'] },
-                riskOzeti: { type: Type.STRING },
-                kriterAnalizleri: {
+                bolumAdi: { type: Type.STRING },
+                items: {
                     type: Type.ARRAY,
                     items: {
                         type: Type.OBJECT,
-                        properties: {
-                            kriterAdi: { type: Type.STRING },
-                            riskDurumu: { type: Type.STRING, enum: ['Düşük', 'Orta', 'Yüksek', 'Tespit Edilmedi'] },
-                            analizDetayi: { type: Type.STRING },
-                            ilgiliHesaplar: { type: Type.ARRAY, items: { type: Type.STRING } },
-                            mevzuatReferansi: { type: Type.STRING },
-                        },
-                        required: ['kriterAdi', 'riskDurumu', 'analizDetayi', 'ilgiliHesaplar', 'mevzuatReferansi']
+                        properties: { aciklama: { type: Type.STRING }, tutar: { type: Type.NUMBER }, isSub: { type: Type.BOOLEAN } },
+                        required: ['aciklama', 'tutar', 'isSub']
                     }
                 },
-                aksiyonOnerileri: { type: Type.ARRAY, items: { type: Type.STRING } },
+                toplam: { type: Type.NUMBER }
             },
-            required: ['genelRiskDurumu', 'riskOzeti', 'kriterAnalizleri', 'aksiyonOnerileri']
+            required: ['bolumAdi', 'items', 'toplam']
         },
-        nakitAkim: {
+        yatirim: {
             type: Type.OBJECT,
             properties: {
-                isletme: {
-                    type: Type.OBJECT,
-                    properties: {
-                        bolumAdi: { type: Type.STRING },
-                        items: {
-                            type: Type.ARRAY,
-                            items: {
-                                type: Type.OBJECT,
-                                properties: { aciklama: { type: Type.STRING }, tutar: { type: Type.NUMBER }, isSub: { type: Type.BOOLEAN } },
-                                required: ['aciklama', 'tutar', 'isSub']
-                            }
-                        },
-                        toplam: { type: Type.NUMBER }
-                    },
-                    required: ['bolumAdi', 'items', 'toplam']
+                bolumAdi: { type: Type.STRING },
+                items: {
+                    type: Type.ARRAY,
+                    items: {
+                        type: Type.OBJECT,
+                        properties: { aciklama: { type: Type.STRING }, tutar: { type: Type.NUMBER }, isSub: { type: Type.BOOLEAN } },
+                        required: ['aciklama', 'tutar', 'isSub']
+                    }
                 },
-                yatirim: {
-                    type: Type.OBJECT,
-                    properties: {
-                        bolumAdi: { type: Type.STRING },
-                        items: {
-                            type: Type.ARRAY,
-                            items: {
-                                type: Type.OBJECT,
-                                properties: { aciklama: { type: Type.STRING }, tutar: { type: Type.NUMBER }, isSub: { type: Type.BOOLEAN } },
-                                required: ['aciklama', 'tutar', 'isSub']
-                            }
-                        },
-                        toplam: { type: Type.NUMBER }
-                    },
-                    required: ['bolumAdi', 'items', 'toplam']
-                },
-                finansman: {
-                    type: Type.OBJECT,
-                    properties: {
-                        bolumAdi: { type: Type.STRING },
-                        items: {
-                            type: Type.ARRAY,
-                            items: {
-                                type: Type.OBJECT,
-                                properties: { aciklama: { type: Type.STRING }, tutar: { type: Type.NUMBER }, isSub: { type: Type.BOOLEAN } },
-                                required: ['aciklama', 'tutar', 'isSub']
-                            }
-                        },
-                        toplam: { type: Type.NUMBER }
-                    },
-                    required: ['bolumAdi', 'items', 'toplam']
-                },
-                netArtis: { type: Type.OBJECT, properties: { aciklama: { type: Type.STRING }, tutar: { type: Type.NUMBER } }, required: ['aciklama', 'tutar'] },
-                donemBasi: { type: Type.OBJECT, properties: { aciklama: { type: Type.STRING }, tutar: { type: Type.NUMBER } }, required: ['aciklama', 'tutar'] },
-                donemSonu: { type: Type.OBJECT, properties: { aciklama: { type: Type.STRING }, tutar: { type: Type.NUMBER } }, required: ['aciklama', 'tutar'] },
+                toplam: { type: Type.NUMBER }
             },
-            required: ['isletme', 'yatirim', 'finansman', 'netArtis', 'donemBasi', 'donemSonu']
+            required: ['bolumAdi', 'items', 'toplam']
         },
+        finansman: {
+            type: Type.OBJECT,
+            properties: {
+                bolumAdi: { type: Type.STRING },
+                items: {
+                    type: Type.ARRAY,
+                    items: {
+                        type: Type.OBJECT,
+                        properties: { aciklama: { type: Type.STRING }, tutar: { type: Type.NUMBER }, isSub: { type: Type.BOOLEAN } },
+                        required: ['aciklama', 'tutar', 'isSub']
+                    }
+                },
+                toplam: { type: Type.NUMBER }
+            },
+            required: ['bolumAdi', 'items', 'toplam']
+        },
+        netArtis: { type: Type.OBJECT, properties: { aciklama: { type: Type.STRING }, tutar: { type: Type.NUMBER } }, required: ['aciklama', 'tutar'] },
+        donemBasi: { type: Type.OBJECT, properties: { aciklama: { type: Type.STRING }, tutar: { type: Type.NUMBER } }, required: ['aciklama', 'tutar'] },
+        donemSonu: { type: Type.OBJECT, properties: { aciklama: { type: Type.STRING }, tutar: { type: Type.NUMBER } }, required: ['aciklama', 'tutar'] },
     },
-    required: [
-        'dashboard', 'mizan', 'bilanco', 'gelirGider', 'rasyolar', 'vergiselAnaliz',
-        'gelirGiderAnalizi', 'kurganAnalizi', 'nakitAkim'
-    ]
+    required: ['isletme', 'yatirim', 'finansman', 'netArtis', 'donemBasi', 'donemSonu']
 };
