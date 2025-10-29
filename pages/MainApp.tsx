@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Sidebar } from '../components/layout/Sidebar';
 import { Header } from '../components/layout/Header';
 import { Dashboard } from './Dashboard';
@@ -37,16 +37,6 @@ async function extractTextFromPdf(file: File, onProgress: (progress: number) => 
     return fullText;
 }
 
-const analysisMessages = [
-    "Temel mali tablolar oluşturuluyor...",
-    "Finansal oranlar hesaplanıyor...",
-    "Varlık ve kaynak yapısı inceleniyor...",
-    "Vergisel riskler taranıyor...",
-    "Nakit akım analizi yapılıyor...",
-    "Sahte belge (Kurgan) riskleri değerlendiriliyor...",
-    "Raporlar birleştiriliyor, lütfen bekleyin...",
-];
-
 export const MainApp: React.FC = () => {
     const [currentPage, setCurrentPage] = useState<Page>('Dashboard');
     const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
@@ -54,28 +44,6 @@ export const MainApp: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [parsingProgress, setParsingProgress] = useState<number>(0);
     const [analysisStep, setAnalysisStep] = useState<string>('');
-    const messageIntervalRef = useRef<number | null>(null);
-
-
-    useEffect(() => {
-        if (isLoading && parsingProgress === 0 && !analysisStep) {
-            let messageIndex = 0;
-            setAnalysisStep(analysisMessages[messageIndex]);
-            messageIntervalRef.current = window.setInterval(() => {
-                messageIndex = (messageIndex + 1) % analysisMessages.length;
-                setAnalysisStep(analysisMessages[messageIndex]);
-            }, 2500);
-        } else if (!isLoading && messageIntervalRef.current) {
-            clearInterval(messageIntervalRef.current);
-            messageIntervalRef.current = null;
-        }
-
-        return () => {
-            if (messageIntervalRef.current) {
-                clearInterval(messageIntervalRef.current);
-            }
-        };
-    }, [isLoading, parsingProgress, analysisStep]);
 
     const handleAnalysis = useCallback(async (file: File) => {
         setIsLoading(true);
@@ -95,19 +63,16 @@ export const MainApp: React.FC = () => {
             return;
         }
         
-        // Reset progress and clear interval to switch to the next loader phase
         setParsingProgress(0);
-        if (messageIntervalRef.current) clearInterval(messageIntervalRef.current);
-        messageIntervalRef.current = null;
+        setAnalysisStep("Analiz başlatılıyor...");
 
 
         try {
             if (!pdfText || pdfText.trim().length < 100) {
                  throw new Error("PDF'ten yeterli metin çıkarılamadı. Dosyanın metin tabanlı olduğundan emin olun.");
             }
-             // Dummy onProgress for the service as we now handle messaging internally
-            const data = await performFullAnalysis(pdfText, () => {});
-            setAnalysisData({ ...data, pdfText });
+            const data = await performFullAnalysis(pdfText, setAnalysisStep);
+            setAnalysisData(data);
             setCurrentPage('Dashboard');
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Analiz sırasında bilinmeyen bir hata oluştu.');
@@ -157,7 +122,7 @@ export const MainApp: React.FC = () => {
         if (parsingProgress > 0) {
             return <ProgressLoader progress={parsingProgress} message="PDF dosyası okunuyor ve metin çıkarılıyor..." />;
         }
-        return <Loader message={analysisStep || "Analiz başlatılıyor..."} />;
+        return <Loader message={analysisStep || "Analiz hazırlanıyor..."} />;
     }
 
     if (!analysisData) {
