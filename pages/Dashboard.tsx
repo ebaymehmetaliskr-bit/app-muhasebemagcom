@@ -2,6 +2,8 @@ import React from 'react';
 import { AnalysisData } from '../types';
 import { Card } from '../components/ui/Card';
 import { SimplePieChart, SimpleBarChart } from '../components/charts/Charts';
+import { ArrowDownIcon, ArrowUpIcon } from '../components/ui/Icons';
+import { formatCurrency } from '../utils/formatters';
 
 interface DashboardProps {
     data: AnalysisData;
@@ -16,6 +18,41 @@ const SummaryCard: React.FC<{ title: string; value: number; detail: string; }> =
         <p className="text-xs text-gray-500 mt-2">{detail}</p>
     </Card>
 );
+
+const ProfitabilityTrendCard: React.FC<{
+    name: string;
+    cariDonem: number;
+    oncekiDonem: number;
+}> = ({ name, cariDonem, oncekiDonem }) => {
+    const change = cariDonem - oncekiDonem;
+    const percentageChange = oncekiDonem !== 0 ? (change / Math.abs(oncekiDonem)) * 100 : (cariDonem !== 0 ? Infinity : 0);
+    const isPositive = change >= 0;
+
+    const changeText = isFinite(percentageChange)
+        ? `${isPositive ? '+' : ''}${percentageChange.toFixed(1)}%`
+        : (isPositive ? '∞' : '-∞');
+
+    const changeColor = isPositive ? 'text-green-400' : 'text-red-400';
+    const changeBgColor = isPositive ? 'bg-green-500/10' : 'bg-red-500/10';
+    
+    return (
+        <Card className="flex flex-col justify-between bg-slate-800/60 p-4">
+            <div>
+                <div className="flex justify-between items-center">
+                    <h4 className="text-sm text-gray-400 font-medium">{name}</h4>
+                    <div className={`flex items-center px-2 py-1 rounded-md text-xs font-bold ${changeBgColor} ${changeColor}`}>
+                        {isPositive ? <ArrowUpIcon /> : <ArrowDownIcon />}
+                        <span className="ml-1">{changeText}</span>
+                    </div>
+                </div>
+                <p className="text-2xl font-bold text-white mt-2">{formatCurrency(cariDonem)}</p>
+            </div>
+            <div className="text-xs text-gray-500 mt-1">
+                Önceki Dönem: {formatCurrency(oncekiDonem)}
+            </div>
+        </Card>
+    );
+};
 
 export const Dashboard: React.FC<DashboardProps> = ({ data }) => {
     const { summary, aktifYapi, pasifYapi } = data.dashboard;
@@ -52,7 +89,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ data }) => {
             </div>
             
             <Card title="Kârlılık Trend Analizi">
-                 <SimpleBarChart data={karlilik} keys={['Cari Dönem', 'Önceki Dönem']} />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {karlilik.map(item => (
+                        <ProfitabilityTrendCard
+                            key={item.name}
+                            name={item.name}
+                            cariDonem={item['Cari Dönem']}
+                            oncekiDonem={item['Önceki Dönem']}
+                        />
+                    ))}
+                </div>
             </Card>
 
         </div>

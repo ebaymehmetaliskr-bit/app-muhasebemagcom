@@ -22,7 +22,10 @@ const generateJson = async <T>(ai: GoogleGenAI, prompt: string, schema: object):
             temperature: 0.1,
         },
     });
-    const responseText = response.text.trim();
+    const responseText = response.text?.trim();
+    if (!responseText) {
+        throw new Error("Received an empty response from the AI service for this part of the analysis.");
+    }
     return JSON.parse(responseText) as T;
 };
 

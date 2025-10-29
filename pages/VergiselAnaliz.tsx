@@ -6,6 +6,7 @@ import { BookIcon, DownloadIcon, ExternalLinkIcon, InfoIcon, ReportIcon, Setting
 import { generateDetailedTaxReport } from '../services/geminiService';
 import { robotoFont } from '../utils/robotoFont';
 import { formatCurrency } from '../utils/formatters';
+import useLocalStorage from '../hooks/useLocalStorage';
 
 // Forward declaration for jsPDF and autoTable from window object
 declare const jspdf: any;
@@ -29,15 +30,18 @@ const getCategoryColor = (category: string) => {
 
 const AnalizCard: React.FC<{ 
     item: VergiselAnalizItem; 
-    onTitleClick: () => void;
+    onCardClick: () => void;
     onAccountCodeClick: (hesapKodu: string) => void;
-}> = ({ item, onTitleClick, onAccountCodeClick }) => {
+}> = ({ item, onCardClick, onAccountCodeClick }) => {
     const isRisk = item.durum === 'Hayır';
     const durumClass = isRisk ? 'bg-red-600' : 'bg-green-600';
     const categoryColorClass = getCategoryColor(item.kategori);
 
     return (
-        <Card className={`flex flex-col justify-between bg-slate-800/80 group transition-all hover:shadow-lg ${isRisk ? 'border-red-600' : 'hover:border-blue-500/50'}`}>
+        <Card 
+            onClick={onCardClick}
+            className={`flex flex-col justify-between bg-slate-800/80 group transition-all hover:shadow-lg ${isRisk ? 'border-red-600' : 'hover:border-blue-500/50'}`}
+        >
             <div>
                 <div className="flex justify-between items-start mb-3">
                     <span className={`text-xs font-bold px-2 py-1 rounded ${categoryColorClass}`}>
@@ -48,7 +52,7 @@ const AnalizCard: React.FC<{
                             item.hesapKodlari.map(kod => (
                             <button 
                                 key={kod} 
-                                onClick={() => onAccountCodeClick(kod)}
+                                onClick={(e) => { e.stopPropagation(); onAccountCodeClick(kod); }}
                                 className="text-xs font-semibold bg-slate-600 text-white px-2 py-1 rounded cursor-pointer hover:bg-slate-500 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-slate-500"
                             >
                                 {kod}
@@ -57,11 +61,7 @@ const AnalizCard: React.FC<{
                     </div>
                 </div>
                 <div 
-                    className="font-bold text-white mb-2 cursor-pointer group-hover:text-blue-400 transition-colors flex items-center justify-between"
-                    onClick={onTitleClick}
-                    role="button"
-                    tabIndex={0}
-                    onKeyPress={(e) => { if (e.key === 'Enter' || e.key === ' ') onTitleClick(); }}
+                    className="font-bold text-white mb-2 group-hover:text-blue-400 transition-colors flex items-center justify-between"
                 >
                     <h4 className="text-base leading-tight pr-2">{item.baslik}</h4>
                     <InfoIcon className="w-5 h-5 text-gray-500 group-hover:text-blue-400 transition-colors flex-shrink-0" />
@@ -94,7 +94,7 @@ export const VergiselAnaliz: React.FC<{ data: VergiselAnalizItem[], pdfText: str
     const [detailedReport, setDetailedReport] = useState<DetailedTaxReportItem[] | null>(null);
     const [reportError, setReportError] = useState<string | null>(null);
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState<boolean>(false);
-    const [pdfSettings, setPdfSettings] = useState<PdfSettings>({
+    const [pdfSettings, setPdfSettings] = useLocalStorage<PdfSettings>('pdfSettings', {
         logo: null,
         headerBgColor: '#1e3a8a',
         headerTextColor: '#ffffff',
@@ -366,7 +366,7 @@ export const VergiselAnaliz: React.FC<{ data: VergiselAnalizItem[], pdfText: str
                     <AnalizCard 
                         key={index} 
                         item={item} 
-                        onTitleClick={() => setSelectedItem(item)} 
+                        onCardClick={() => setSelectedItem(item)} 
                         onAccountCodeClick={handleAccountCodeClick}
                     />
                 ))}

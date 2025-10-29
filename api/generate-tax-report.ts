@@ -1,7 +1,7 @@
 import { GoogleGenAI } from '@google/genai';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { detailedTaxReportSchema } from './_schemas.js';
-import type { DetailedTaxReportItem, VergiselAnalizItem } from '../types';
+import type { DetailedTaxReportItem } from '../types';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method !== 'POST') {
@@ -56,7 +56,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             },
         });
         
-        const responseText = response.text.trim();
+        const responseText = response.text?.trim();
+        if (!responseText) {
+            throw new Error("Received an empty response from the AI service when generating the report.");
+        }
         const reportResult: DetailedTaxReportItem[] = JSON.parse(responseText);
 
         return res.status(200).json(reportResult);
