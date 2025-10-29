@@ -1,16 +1,12 @@
-
 import React, { useState, useMemo } from 'react';
 import { MizanItem } from '../types';
 import { Card } from '../components/ui/Card';
 import { ArrowUpIcon, ArrowDownIcon } from '../components/ui/Icons';
+import { formatCurrency } from '../utils/formatters';
 
 interface MizanProps {
     data: MizanItem[];
 }
-
-const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(value);
-};
 
 const ChangeIndicator: React.FC<{ change: number }> = ({ change }) => {
     if (change === 0) return <span className="text-gray-500">-</span>;
@@ -71,14 +67,22 @@ export const Mizan: React.FC<MizanProps> = ({ data }) => {
                                 const change = item.oncekiDonem === 0 
                                     ? (item.cariDonem > 0 ? Infinity : 0) 
                                     : ((item.cariDonem - item.oncekiDonem) / Math.abs(item.oncekiDonem)) * 100;
-                                const rowClass = item.isMain ? 'bg-blue-900/30 font-bold' : item.isSub ? 'bg-slate-800/50 font-semibold' : 'hover:bg-slate-700/50';
+                                
+                                let rowClass;
+                                if (item.isMain) {
+                                    rowClass = 'bg-blue-900/30 font-bold hover:bg-blue-900/50 hover:border-blue-400';
+                                } else if (item.isSub) {
+                                    rowClass = 'bg-slate-800/50 font-semibold hover:bg-slate-700/80 hover:border-slate-500';
+                                } else {
+                                    rowClass = 'hover:bg-slate-700/50 hover:border-slate-500';
+                                }
 
                                 return (
-                                    <tr key={item.hesapKodu} className={`border-b border-slate-700 transition-colors duration-150 ${rowClass}`}>
+                                    <tr key={item.hesapKodu} className={`border-b border-slate-700 border-l-2 border-transparent transition-all duration-150 ${rowClass}`}>
                                         <td className="px-6 py-4 whitespace-nowrap">{item.hesapKodu}</td>
                                         <td className="px-6 py-4 font-medium text-white">{item.hesapAdi}</td>
-                                        <td className={`px-6 py-4 text-right font-mono ${item.oncekiDonem < 0 ? 'text-red-400' : ''}`}>{formatCurrency(item.oncekiDonem)}</td>
-                                        <td className={`px-6 py-4 text-right font-mono ${item.cariDonem < 0 ? 'text-red-400' : ''}`}>{formatCurrency(item.cariDonem)}</td>
+                                        <td className="px-6 py-4 text-right font-mono">{formatCurrency(item.oncekiDonem)}</td>
+                                        <td className="px-6 py-4 text-right font-mono">{formatCurrency(item.cariDonem)}</td>
                                         <td className="px-6 py-4 text-right">
                                             {!item.isMain && !item.isSub && <ChangeIndicator change={change} />}
                                         </td>

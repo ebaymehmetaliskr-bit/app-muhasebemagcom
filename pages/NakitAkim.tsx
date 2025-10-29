@@ -1,12 +1,7 @@
-
 import React from 'react';
 import { NakitAkimData, NakitAkimBolum } from '../types';
 import { Card } from '../components/ui/Card';
-
-const formatCurrency = (value: number) => {
-    const formatted = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(value);
-    return value < 0 ? `(${formatted.replace('-', '')})` : formatted;
-};
+import { formatCurrency } from '../utils/formatters';
 
 const SectionTable: React.FC<{ bolum: NakitAkimBolum }> = ({ bolum }) => (
     <div className="mb-6">
@@ -17,7 +12,7 @@ const SectionTable: React.FC<{ bolum: NakitAkimBolum }> = ({ bolum }) => (
                     {bolum.items.map((item, index) => (
                         <tr key={index} className="hover:bg-slate-700/50 transition-colors duration-150">
                             <td className={`py-3 px-4 ${item.isSub ? 'pl-8' : ''}`}>{item.aciklama}</td>
-                            <td className={`py-3 px-4 text-right font-mono ${item.tutar < 0 ? 'text-red-400' : 'text-gray-300'}`}>
+                            <td className={`py-3 px-4 text-right font-mono`}>
                                 {formatCurrency(item.tutar)}
                             </td>
                         </tr>

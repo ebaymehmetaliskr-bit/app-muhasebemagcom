@@ -23,9 +23,9 @@ const CustomPieTooltip = ({ active, payload, data }: any) => {
         const percent = totalValue > 0 ? ((currentData.value / totalValue) * 100).toFixed(2) : 0;
 
         return (
-            <div className="bg-slate-700 p-3 rounded-lg border border-slate-600 shadow-xl">
+            <div className="bg-slate-800/80 backdrop-blur-sm p-3 rounded-lg border border-slate-600 shadow-xl">
                 <p className="font-bold text-white flex items-center">
-                    <span className="w-2 h-2 rounded-full mr-2" style={{ backgroundColor: currentData.color }}></span>
+                    <span className="w-2 h-2 rounded-full mr-2" style={{ backgroundColor: currentData.fill }}></span>
                     {currentData.name}
                 </p>
                 <p className="text-sm text-gray-300 mt-1">Değer: {formatValueForTooltip(currentData.value)}</p>
@@ -39,19 +39,21 @@ const CustomPieTooltip = ({ active, payload, data }: any) => {
 const CustomBarTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-slate-700 p-3 rounded-lg border border-slate-600 shadow-xl text-sm">
+      <div className="bg-slate-800/80 backdrop-blur-sm p-3 rounded-lg border border-slate-600 shadow-xl text-sm">
         <p className="font-bold text-white mb-2">{label}</p>
-        {payload.map((pld: any) => (
-          <div key={pld.dataKey} className="flex items-center justify-between space-x-4">
-            <div className="flex items-center">
-              <div className="w-2 h-2 rounded-full mr-2" style={{ backgroundColor: pld.fill }}></div>
-              <span className="text-gray-400 mr-2">{pld.name}:</span>
-            </div>
-            <span className="font-semibold text-white">
-              {formatValueForTooltip(pld.value)}
-            </span>
-          </div>
-        ))}
+        <ul className="space-y-1">
+            {payload.map((pld: any) => (
+              <li key={pld.dataKey} className="flex items-center justify-between space-x-4">
+                <div className="flex items-center">
+                  <div className="w-2 h-2 rounded-full mr-2" style={{ backgroundColor: pld.fill }}></div>
+                  <span className="text-gray-400 mr-2">{pld.name}:</span>
+                </div>
+                <span className="font-semibold text-white">
+                  {formatValueForTooltip(pld.value)}
+                </span>
+              </li>
+            ))}
+        </ul>
       </div>
     );
   }

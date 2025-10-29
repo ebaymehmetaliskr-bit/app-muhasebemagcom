@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { VergiselAnalizItem, DetailedTaxReportItem, MizanItem, PdfSettings } from '../types';
 import { Card } from '../components/ui/Card';
@@ -6,14 +5,10 @@ import { Modal } from '../components/ui/Modal';
 import { BookIcon, DownloadIcon, ExternalLinkIcon, InfoIcon, ReportIcon, SettingsIcon, WarningIcon } from '../components/ui/Icons';
 import { generateDetailedTaxReport } from '../services/geminiService';
 import { robotoFont } from '../utils/robotoFont';
+import { formatCurrency } from '../utils/formatters';
 
 // Forward declaration for jsPDF and autoTable from window object
 declare const jspdf: any;
-
-const formatCurrency = (value: number) => {
-    const formatted = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(value);
-    return value < 0 ? `(${formatted.replace('-', '')})` : formatted;
-};
 
 const getCategoryColor = (category: string) => {
     switch (category) {
@@ -462,13 +457,13 @@ export const VergiselAnaliz: React.FC<{ data: VergiselAnalizItem[], pdfText: str
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <Card className="text-center">
                                 <h4 className="text-sm text-gray-400">Önceki Dönem</h4>
-                                <p className={`text-2xl font-bold mt-2 ${selectedAccount.oncekiDonem < 0 ? 'text-red-400' : 'text-gray-200'}`}>
+                                <p className="text-2xl font-bold mt-2">
                                     {formatCurrency(selectedAccount.oncekiDonem)}
                                 </p>
                             </Card>
                             <Card className="text-center">
                                 <h4 className="text-sm text-gray-400">Cari Dönem</h4>
-                                <p className={`text-2xl font-bold mt-2 ${selectedAccount.cariDonem < 0 ? 'text-red-400' : 'text-gray-200'}`}>
+                                <p className="text-2xl font-bold mt-2">
                                     {formatCurrency(selectedAccount.cariDonem)}
                                 </p>
                             </Card>

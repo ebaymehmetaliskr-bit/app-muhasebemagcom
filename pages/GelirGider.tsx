@@ -1,11 +1,7 @@
-
 import React from 'react';
 import { GelirGiderItem } from '../types';
 import { Card } from '../components/ui/Card';
-
-const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(value);
-};
+import { formatCurrency } from '../utils/formatters';
 
 export const GelirGider: React.FC<{ data: GelirGiderItem[] }> = ({ data }) => {
     return (
@@ -25,10 +21,10 @@ export const GelirGider: React.FC<{ data: GelirGiderItem[] }> = ({ data }) => {
                             {data.map((item, index) => (
                                 <tr key={index} className="border-b border-slate-700 hover:bg-slate-700/50 transition-colors duration-150">
                                     <td className="px-6 py-4 font-medium text-white">{item.aciklama}</td>
-                                    <td className={`px-6 py-4 text-right font-mono ${item.oncekiDonem < 0 ? 'text-red-400' : ''}`}>
+                                    <td className="px-6 py-4 text-right font-mono">
                                         {formatCurrency(item.oncekiDonem)}
                                     </td>
-                                    <td className={`px-6 py-4 text-right font-mono ${item.cariDonem < 0 ? 'text-red-400' : ''}`}>
+                                    <td className="px-6 py-4 text-right font-mono">
                                         {formatCurrency(item.cariDonem)}
                                     </td>
                                 </tr>

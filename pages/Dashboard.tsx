@@ -1,6 +1,3 @@
-
-
-
 import React from 'react';
 import { AnalysisData } from '../types';
 import { Card } from '../components/ui/Card';
@@ -22,7 +19,6 @@ const SummaryCard: React.FC<{ title: string; value: number; detail: string; }> =
 
 export const Dashboard: React.FC<DashboardProps> = ({ data }) => {
     const { summary, aktifYapi, pasifYapi } = data.dashboard;
-    // FIX: Property 'karlilik' does not exist on type 'AnalysisData'. It exists on 'data.rasyolar'.
     const { gelirGiderAnalizi, rasyolar: { karlilik } } = data;
 
     return (

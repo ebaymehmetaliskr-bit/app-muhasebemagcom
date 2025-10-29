@@ -1,10 +1,8 @@
-
 import React from 'react';
 import { BilancoData, GelirGiderItem } from '../types';
 import { Card } from '../components/ui/Card';
 import { ArrowUpIcon, ArrowDownIcon } from '../components/ui/Icons';
-
-const formatCurrency = (value: number) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(value);
+import { formatCurrency } from '../utils/formatters';
 
 const YatayAnalizTable: React.FC<{ title: string; data: { ad: string; onceki: number; cari: number }[] }> = ({ title, data }) => (
     <Card>

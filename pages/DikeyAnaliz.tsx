@@ -1,10 +1,7 @@
-
 import React from 'react';
 import { BilancoData, GelirGiderItem } from '../types';
 import { Card } from '../components/ui/Card';
-
-const formatCurrency = (value: number) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(value);
-const formatPercent = (value: number) => `${value.toFixed(2)}%`;
+import { formatCurrency, formatPercent } from '../utils/formatters';
 
 const DikeyAnalizTable: React.FC<{ title: string; data: { ad: string; oncekiTutar: number; cariTutar: number }[]; toplam: { onceki: number; cari: number } }> = ({ title, data, toplam }) => (
     <Card>

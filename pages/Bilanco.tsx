@@ -1,11 +1,7 @@
-
 import React from 'react';
 import { BilancoData, BilancoBolum } from '../types';
 import { Card } from '../components/ui/Card';
-
-const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(value);
-};
+import { formatCurrency } from '../utils/formatters';
 
 const BilancoTable: React.FC<{ data: BilancoBolum[], title: string, titleColor: string }> = ({ data, title, titleColor }) => (
     <Card className="flex-1">
@@ -28,8 +24,8 @@ const BilancoTable: React.FC<{ data: BilancoBolum[], title: string, titleColor: 
                             {bolum.stoklar.map(stok => (
                                 <tr key={stok.aciklama} className="border-b border-slate-700 last:border-b-0 hover:bg-slate-700/50 transition-colors duration-150">
                                     <td className={`px-6 py-3 ${stok.aciklama.startsWith('..') ? 'pl-10' : ''}`}>{stok.aciklama}</td>
-                                    <td className={`px-6 py-3 text-right font-mono ${stok.oncekiDonem < 0 ? 'text-red-400' : ''}`}>{formatCurrency(stok.oncekiDonem)}</td>
-                                    <td className={`px-6 py-3 text-right font-mono ${stok.cariDonem < 0 ? 'text-red-400' : ''}`}>{formatCurrency(stok.cariDonem)}</td>
+                                    <td className="px-6 py-3 text-right font-mono">{formatCurrency(stok.oncekiDonem)}</td>
+                                    <td className="px-6 py-3 text-right font-mono">{formatCurrency(stok.cariDonem)}</td>
                                 </tr>
                             ))}
                         </React.Fragment>
