@@ -1,4 +1,4 @@
-import { AnalysisData, DetailedTaxReportItem, VergiselAnalizItem, MizanItem, BilancoData, GelirGiderItem, RasyoData, KurganAnaliz, NakitAkimData } from '../types';
+import { AnalysisData, DetailedTaxReportItem, VergiselAnalizItem, MizanItem, BilancoData, GelirGiderItem, RasyoData, KurganAnaliz, NakitAkimData, KKEGItem } from '../types';
 
 // Generic helper to call our backend API endpoints
 async function callApi<T>(endpoint: string, body: object): Promise<T> {
@@ -38,6 +38,7 @@ export const performFullAnalysis = async (
         { type: 'gelirGider', message: 'Gelir-Gider tablosu çıkarılıyor...' },
         { type: 'rasyolar', message: 'Finansal rasyolar hesaplanıyor...' },
         { type: 'vergiselAnaliz', message: 'Vergisel riskler taranıyor...' },
+        { type: 'kkeg', message: 'Kanunen Kabul Edilmeyen Giderler (KKEG) taranıyor...' },
         { type: 'kurganAnalizi', message: 'Sahte belge (Kurgan) risk analizi yapılıyor...' },
         { type: 'nakitAkim', message: 'Nakit akım tablosu hazırlanıyor...' },
     ];
@@ -56,6 +57,7 @@ export const performFullAnalysis = async (
     const gelirGiderData = results.gelirGider as GelirGiderItem[];
     const rasyolarData = results.rasyolar as RasyoData;
     const vergiselAnalizData = results.vergiselAnaliz as VergiselAnalizItem[];
+    const kkegAnalizData = results.kkeg as KKEGItem[];
     const kurganAnalizData = results.kurganAnalizi as KurganAnaliz;
     const nakitAkimData = results.nakitAkim as NakitAkimData;
     
@@ -68,6 +70,7 @@ export const performFullAnalysis = async (
                 bilanco: bilancoData.aktif.flatMap(b => b.stoklar).length + bilancoData.pasif.flatMap(b => b.stoklar).length,
                 gelirGider: gelirGiderData.length,
                 analizler: vergiselAnalizData.length,
+                kkeg: kkegAnalizData.length,
             },
              aktifYapi: [
                 { name: 'Dönen Varlıklar', value: bilancoData.aktif.find(b => b.bolumAdi.includes("Dönen"))?.stoklar.reduce((sum, s) => sum + s.cariDonem, 0) || 0 },
@@ -89,6 +92,7 @@ export const performFullAnalysis = async (
             'Cari Dönem': Math.abs(item.cariDonem),
             'Önceki Dönem': Math.abs(item.oncekiDonem)
         })),
+        kkegAnalizi: kkegAnalizData,
         kurganAnalizi: kurganAnalizData,
         nakitAkim: nakitAkimData
     };

@@ -13,7 +13,7 @@ const SummaryCard: React.FC<{ title: string; value: number; detail: string; }> =
     <Card className="flex flex-col justify-between">
         <div>
             <h4 className="text-gray-400 text-sm">{title}</h4>
-            <p className="text-3xl font-bold text-white">{value} <span className="text-lg">hesap</span></p>
+            <p className="text-3xl font-bold text-white">{value} <span className="text-lg">{title === 'KKEG' ? 'kalem' : 'hesap'}</span></p>
         </div>
         <p className="text-xs text-gray-500 mt-2">{detail}</p>
     </Card>
@@ -63,11 +63,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ data }) => {
             <h2 className="text-2xl font-bold text-white">Dashboard</h2>
             <p className="text-gray-400 -mt-6">Mali tablolarınızın genel görünümü ve analizleri</p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
                 <SummaryCard title="Mizan" value={summary.mizan} detail="Mizan tablosu detayları" />
                 <SummaryCard title="Bilanço" value={summary.bilanco} detail="Bilanço tablosu detayları" />
                 <SummaryCard title="Gelir-Gider" value={summary.gelirGider} detail="Gelir tablosu detayları" />
-                <SummaryCard title="Analizler" value={summary.analizler} detail="Finansal analiz araçları" />
+                <SummaryCard title="Vergi Analizi" value={summary.analizler} detail="Vergisel kontrol noktaları" />
+                <SummaryCard title="KKEG" value={summary.kkeg} detail="Kanunen Kabul Edilmeyen Giderler" />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -90,12 +91,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ data }) => {
             
             <Card title="Kârlılık Trend Analizi">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {karlilik.map(item => (
+                    {/* Fix: `karlilik` is an object of type `RasyoGrup`. The array to iterate over is `karlilik.ratios`. Also, property access for dönem values should be camelCase. */}
+                    {karlilik.ratios.map(item => (
                         <ProfitabilityTrendCard
                             key={item.name}
                             name={item.name}
-                            cariDonem={item['Cari Dönem']}
-                            oncekiDonem={item['Önceki Dönem']}
+                            cariDonem={item.cariDonem}
+                            oncekiDonem={item.oncekiDonem}
                         />
                     ))}
                 </div>

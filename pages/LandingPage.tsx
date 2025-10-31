@@ -111,7 +111,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
 <h2 className="text-3xl sm:text-4xl font-bold leading-tight tracking-tight">İş Akışınızı Güçlendiren Özellikler</h2>
 <p className="text-lg text-gray-400">Finansal analiz sürecinizi dönüştürmek için tasarlanmış güçlü araç setimizi keşfedin.</p>
 </div>
-<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 <div className="flex flex-col gap-4 rounded-xl border border-gray-800 bg-gray-900/50 p-6">
 <div className="text-[#10B981]"><span className="material-symbols-outlined text-3xl">table_chart</span></div>
 <div className="flex flex-col gap-1">
@@ -153,6 +153,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
 <h3 className="text-lg font-bold">Güvenli Veri İşleme</h3>
 <p className="text-gray-400">Hassas finansal verilerinizin güvenliğini en üst düzeyde şifreleme ile sağlıyoruz.</p>
 </div>
+</div>
+<div className="flex flex-col gap-4 rounded-xl border border-gray-800 bg-gray-900/50 p-6">
+    <div className="text-[#10B981]"><span className="material-symbols-outlined text-3xl">receipt_long</span></div>
+    <div className="flex flex-col gap-1">
+        <h3 className="text-lg font-bold">KKEG Analizi</h3>
+        <p className="text-gray-400">Kanunen Kabul Edilmeyen Giderleri (KKEG) otomatik olarak tespit edin ve vergi matrahınızı optimize edin.</p>
+    </div>
+</div>
+<div className="flex flex-col gap-4 rounded-xl border border-gray-800 bg-gray-900/50 p-6">
+    <div className="text-[#10B981]"><span className="material-symbols-outlined text-3xl">gpp_bad</span></div>
+    <div className="flex flex-col gap-1">
+        <h3 className="text-lg font-bold">Sahte Belge Risk Analizi (Kurgan)</h3>
+        <p className="text-gray-400">VDK'nın KURGAN metodolojisiyle sahte ve muhteviyatı itibarıyla yanıltıcı belge (SMİYB) riskini analiz edin.</p>
+    </div>
 </div>
 </div>
 </div>
@@ -228,7 +242,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
 <span className="material-symbols-outlined transition-transform duration-300 group-open:rotate-180">expand_more</span>
 </summary>
 <div className="mt-2 text-gray-400">
-<p>Veri güvenliği en büyük önceliğimizdir. Tüm belgeleriniz, aktarım sırasında ve sunucularımızda en üst düzey şifreleme standartları ile korunur. Verileriniz izniniz olmadan üçüncü taraflarla asla paylaşılmaz.</p>
+<p>Veri güvenliği en büyük önceliğimizdir. Tüm belgeleriniz, aktarım sırasında ve sunucularımızda en üst düzey şifreleme standartları ile korunur. Verileriniz izniniz olmadan üçüncü tarafla asla paylaşılmaz.</p>
 </div>
 </details>
 <details className="group border-b border-gray-800 pb-4">

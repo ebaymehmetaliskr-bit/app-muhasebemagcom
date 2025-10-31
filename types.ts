@@ -1,27 +1,27 @@
 
 
-
 export type Page = 
   | 'Dashboard'
   | 'Mizan'
-  | 'Finansal Yapı Oranları'
   | 'Bilanço'
   | 'Gelir ve Gider'
+  | 'Nakit Akım'
+  | 'Finansal Yapı Oranları'
   | 'Likidite Oranları'
-  | 'Rasyon Analizi'
+  | 'Devir Hızları'
   | 'Kârlılık Oranları'
   | 'Dikey Analiz'
   | 'Yatay Analiz'
   | 'Vergisel Analiz'
-  | 'Devir Hızları'
-  | 'Kurgan Analizi'
-  | 'Nakit Akım';
+  | 'KKEG Analizi'
+  | 'Kurgan Analizi';
 
 export interface DashboardSummary {
     mizan: number;
     bilanco: number;
     gelirGider: number;
     analizler: number;
+    kkeg: number;
 }
 
 export interface PieChartData {
@@ -71,19 +71,21 @@ export interface RasyoItem {
     name: string;
     cariDonem: number;
     oncekiDonem: number;
-    formula?: string;
+    formula: string;
+    yorum: string;
 }
 
 export interface RasyoGrup {
     title: string;
     ratios: RasyoItem[];
+    ozet: string;
 }
 
 export interface RasyoData {
     finansalYapi: RasyoGrup;
-    likidite: RasyoGrup & { dagilim: PieChartData[] };
-    devirHizlari: RasyoGrup & { karsilastirma: BarChartData[] };
-    karlilik: BarChartData[];
+    likidite: RasyoGrup;
+    devirHizlari: RasyoGrup;
+    karlilik: RasyoGrup;
 }
 
 
@@ -102,7 +104,7 @@ export interface DetailedTaxReportItem {
     riskAnalizi: string;
     mevzuatReferanslari: string[];
     yapilmasiGerekenler: string[];
-    potansiyelVergiCezalari: string;
+    potensiyelVergiCezalari: string;
 }
 
 export interface PdfSettings {
@@ -111,6 +113,14 @@ export interface PdfSettings {
     headerTextColor: string;
     subHeaderColor: string;
     font: 'Roboto' | 'Helvetica' | 'Times New Roman';
+}
+
+export interface KKEGItem {
+    giderAciklamasi: string;
+    tutar: number;
+    gerekce: string;
+    dayanakMevzuat: string;
+    ilgiliHesapKodlari: string[];
 }
 
 export interface KurganKriterAnalizi {
@@ -162,6 +172,7 @@ export interface AnalysisData {
     rasyolar: RasyoData;
     vergiselAnaliz: VergiselAnalizItem[];
     gelirGiderAnalizi: BarChartData[];
+    kkegAnalizi: KKEGItem[];
     kurganAnalizi: KurganAnaliz;
     nakitAkim: NakitAkimData;
     pdfText?: string;

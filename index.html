@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
     <style>
       html {
@@ -15,6 +15,13 @@
       }
       body {
         font-family: 'Manrope', sans-serif;
+      }
+      @keyframes highlight-fade {
+        from { background-color: rgba(59, 130, 246, 0.4); } /* blue-500/40 */
+        to { background-color: transparent; }
+      }
+      .highlight-row {
+        animation: highlight-fade 2.5s ease-out forwards;
       }
     </style>
 <script type="importmap">
@@ -30,8 +37,8 @@
     "@google/genai": "https://aistudiocdn.com/@google/genai@^1.27.0",
     "vitest": "https://aistudiocdn.com/vitest@^4.0.4",
     "vitest/": "https://aistudiocdn.com/vitest@^4.0.4/",
-    "@testing-library/react": "https://aistudiocdn.com/@testing-library/react@^16.3.0",
-    "@testing-library/jest-dom": "https://aistudiocdn.com/@testing-library/jest-dom@^6.9.1"
+    "@testing-library/react": "https://aistudiocdn.com/testing-library/react@^16.3.0",
+    "@testing-library/jest-dom": "https://aistudiocdn.com/testing-library/jest-dom@^6.9.1"
   }
 }
 </script>

@@ -7,7 +7,8 @@ import {
     ratiosSchema, 
     vergiselAnalizSchema, 
     kurganAnalizSchema, 
-    nakitAkimSchema 
+    nakitAkimSchema,
+    kkegAnalizSchema
 } from './_schemas.js';
 
 // Helper function to make individual requests to the Gemini API
@@ -67,12 +68,37 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 schema = gelirGiderSchema;
                 break;
             case 'rasyolar':
-                 prompt = `Based on the financial text, calculate key financial ratios (Leverage, Liquidity, Activity, Profitability). Adhere to the schema. --- ${pdfText} ---`;
+                 prompt = `Provided is the text from a Turkish Corporate Tax Return PDF. Your task is to perform a comprehensive ratio analysis. Calculate the following financial ratios for both the current ('cariDonem') and previous ('oncekiDonem') periods. Group them into four categories: 'finansalYapi', 'likidite', 'devirHizlari', and 'karlilik'.
+
+For each ratio, you MUST provide:
+1.  'name': The Turkish name of the ratio.
+2.  'cariDonem': The calculated value for the current period.
+3.  'oncekiDonem': The calculated value for the previous period.
+4.  'formula': The mathematical formula used for the calculation in Turkish.
+5.  'yorum': A brief, insightful interpretation of the ratio's value and trend, including generally accepted standards where applicable (e.g., "Cari Oran için 1.5-2.0 arası ideal kabul edilir.").
+
+For each of the four groups, you MUST also provide an 'ozet':
+- 'ozet': A concise, 2-3 sentence summary of the company's situation based on the ratios in that specific group. For example, for 'finansalYapi', summarize the overall debt structure and financial risk.
+
+**Ratio List:**
+- **likidite:** Cari Oran, Asit-Test Oranı, Nakit Oranı.
+- **finansalYapi:** Kaldıraç Oranı, Öz Kaynak Oranı, Borç / Öz Kaynak Oranı, Duran Varlıkların Devamlı Sermayeye Oranı, Kısa Vadeli Yabancı Kaynak Oranı, Uzun Vadeli Yabancı Kaynak Oranı, Duran Varlıkların Özkaynaklara Oranı.
+- **devirHizlari:** Stok Devir Hızı, Stokta Kalma Süresi (Gün), Alacak Devir Hızı, Ortalama Tahsil Süresi (Gün), Aktif Devir Hızı.
+- **karlilik:** Brüt Kâr Marjı, Net Kâr Marjı, Öz Kaynak Kârlılığı (ROE), Varlıkların Kârlılığı (ROA).
+
+The output MUST be a single, valid JSON object that strictly adheres to the provided schema. Do not include any explanations outside the JSON.
+---
+${pdfText}
+---`;
                  schema = ratiosSchema;
                 break;
             case 'vergiselAnaliz':
                  prompt = `Based on the financial text, identify at least 20 potential tax risks or compliance checks according to Turkish tax law. Adhere to the schema. --- ${pdfText} ---`;
                  schema = vergiselAnalizSchema;
+                break;
+            case 'kkeg':
+                prompt = `Analyze the provided financial text from a Turkish Corporate Tax Return. Identify and extract all items that are considered "Kanunen Kabul Edilmeyen Giderler" (KKEG) - Non-Deductible Expenses. This includes items like tax penalties, undocumented expenses, excess depreciation, motor vehicle tax for passenger cars, etc. For each item, provide a detailed description, the amount, a justification, the relevant legal basis (e.g., KVK Madde 11/1-d), and the associated account codes. The output must be a valid JSON array adhering strictly to the provided schema. --- ${pdfText} ---`;
+                schema = kkegAnalizSchema;
                 break;
             case 'kurganAnalizi':
                 prompt = `Based on the financial text, perform a fraud risk assessment for fraudulent documents (Sahte Belge) using the VDK KURGAN methodology. Adhere to the schema. --- ${pdfText} ---`;

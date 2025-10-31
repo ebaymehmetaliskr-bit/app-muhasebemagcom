@@ -52,6 +52,12 @@ export const VergiselAnalizIcon: React.FC<React.SVGProps<SVGSVGElement>> = (prop
     </svg>
 );
 
+export const KKEGIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}>
+        <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm-1 9H9v2h4v-2z" />
+    </svg>
+);
+
 export const DevirHizlariIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}>
         <path d="M12 4V1L8 5L12 9V6C15.31 6 18 8.69 18 12C18 13.01 17.75 13.97 17.32 14.8L18.78 16.26C19.55 15.03 20 13.57 20 12C20 7.58 16.42 4 12 4ZM4 12C4 16.42 7.58 20 12 20C13.57 20 15.03 19.55 16.26 18.78L14.8 17.32C13.97 17.75 13.01 18 12 18C8.69 18 6 15.31 6 12V9L2 13L6 17V14C6 14.99 6.25 15.97 6.68 16.8L5.22 18.26C4.45 17.03 4 15.57 4 14V12Z" />
@@ -152,5 +158,17 @@ export const ExternalLinkIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props)
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" {...props}>
         <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
         <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
+    </svg>
+);
+
+export const CalculatorIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}>
+        <path d="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM7 8H9V10H7V8ZM7 12H9V14H7V12ZM11 8H13V10H11V8ZM11 12H13V14H11V12ZM15 17H9V15H15V17ZM15 14H14V12H15V14ZM15 10H14V8H15V10ZM17 14H16V12H17V14ZM17 10H16V8H17V10Z"/>
+    </svg>
+);
+
+export const CompareIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}>
+        <path d="M10 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h5v2h2V1h-2v2zM5 19V5h5v14H5zm14-2h-5V7h5v10zm-2-8h-1v6h1V9zm-2 0h-1v6h1V9z" />
     </svg>
 );

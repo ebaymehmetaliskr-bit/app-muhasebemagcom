@@ -18,7 +18,7 @@ const detailedTaxReportItemSchema = {
         },
         potansiyelVergiCezalari: { type: Type.STRING, description: 'Description of potential tax penalties.' },
     },
-    required: ['baslik', 'riskAnalizi', 'mevzuatReferanslari', 'yapilmasiGerekenler', 'potansiyelVergiCezalari']
+    required: ['baslik', 'riskAnalizi', 'mevzuatReferanslari', 'yapilmasiGerekenler', 'potensiyelVergiCezalari']
 };
 
 // Schema for the entire response of generateDetailedTaxReport, which is an array of the above items
@@ -110,94 +110,42 @@ export const gelirGiderSchema = {
     }
 };
 
+const rasyoItemSchema = {
+    type: Type.OBJECT,
+    properties: {
+        name: { type: Type.STRING },
+        cariDonem: { type: Type.NUMBER },
+        oncekiDonem: { type: Type.NUMBER },
+        formula: { type: Type.STRING, description: "Mathematical formula for the ratio." },
+        yorum: { type: Type.STRING, description: "AI-generated interpretation of the ratio." },
+    },
+    required: ['name', 'cariDonem', 'oncekiDonem', 'formula', 'yorum']
+};
+
+const rasyoGrupSchema = {
+    type: Type.OBJECT,
+    properties: {
+        title: { type: Type.STRING },
+        ratios: {
+            type: Type.ARRAY,
+            items: rasyoItemSchema
+        },
+        ozet: { type: Type.STRING, description: "A concise, AI-generated summary of the financial health based on the ratios in this group." }
+    },
+    required: ['title', 'ratios', 'ozet']
+};
+
 export const ratiosSchema = {
     type: Type.OBJECT,
     properties: {
-        finansalYapi: {
-            type: Type.OBJECT,
-            properties: {
-                title: { type: Type.STRING },
-                ratios: {
-                    type: Type.ARRAY,
-                    items: {
-                        type: Type.OBJECT,
-                        properties: {
-                            name: { type: Type.STRING },
-                            cariDonem: { type: Type.NUMBER },
-                            oncekiDonem: { type: Type.NUMBER },
-                            formula: { type: Type.STRING, description: "Optional formula text." },
-                        },
-                        required: ['name', 'cariDonem', 'oncekiDonem']
-                    }
-                }
-            },
-            required: ['title', 'ratios']
-        },
-        likidite: {
-            type: Type.OBJECT,
-            properties: {
-                title: { type: Type.STRING },
-                ratios: {
-                    type: Type.ARRAY,
-                    items: {
-                        type: Type.OBJECT,
-                        properties: {
-                            name: { type: Type.STRING },
-                            cariDonem: { type: Type.NUMBER },
-                            oncekiDonem: { type: Type.NUMBER },
-                        },
-                        required: ['name', 'cariDonem', 'oncekiDonem']
-                    }
-                },
-                dagilim: {
-                    type: Type.ARRAY,
-                    items: {
-                        type: Type.OBJECT,
-                        properties: { name: { type: Type.STRING }, value: { type: Type.NUMBER } },
-                        required: ['name', 'value']
-                    }
-                }
-            },
-            required: ['title', 'ratios', 'dagilim']
-        },
-        devirHizlari: {
-            type: Type.OBJECT,
-            properties: {
-                title: { type: Type.STRING },
-                ratios: {
-                    type: Type.ARRAY,
-                    items: {
-                        type: Type.OBJECT,
-                        properties: {
-                            name: { type: Type.STRING },
-                            cariDonem: { type: Type.NUMBER },
-                            oncekiDonem: { type: Type.NUMBER },
-                        },
-                        required: ['name', 'cariDonem', 'oncekiDonem']
-                    }
-                },
-                karsilastirma: {
-                    type: Type.ARRAY,
-                    items: {
-                        type: Type.OBJECT,
-                        properties: { name: { type: Type.STRING }, 'Cari Dönem': { type: Type.NUMBER }, 'Önceki Dönem': { type: Type.NUMBER } },
-                        required: ['name', 'Cari Dönem', 'Önceki Dönem']
-                    }
-                }
-            },
-            required: ['title', 'ratios', 'karsilastirma']
-        },
-        karlilik: {
-            type: Type.ARRAY,
-            items: {
-                type: Type.OBJECT,
-                properties: { name: { type: Type.STRING }, 'Cari Dönem': { type: Type.NUMBER }, 'Önceki Dönem': { type: Type.NUMBER } },
-                required: ['name', 'Cari Dönem', 'Önceki Dönem']
-            }
-        }
+        finansalYapi: rasyoGrupSchema,
+        likidite: rasyoGrupSchema,
+        devirHizlari: rasyoGrupSchema,
+        karlilik: rasyoGrupSchema,
     },
     required: ['finansalYapi', 'likidite', 'devirHizlari', 'karlilik']
 };
+
 
 export const vergiselAnalizSchema = {
     type: Type.ARRAY,
@@ -213,6 +161,25 @@ export const vergiselAnalizSchema = {
             mevzuatReferanslari: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Optional list of law references." },
         },
         required: ['hesapKodlari', 'baslik', 'kategori', 'durum', 'aciklama']
+    }
+};
+
+export const kkegAnalizSchema = {
+    type: Type.ARRAY,
+    items: {
+        type: Type.OBJECT,
+        properties: {
+            giderAciklamasi: { type: Type.STRING, description: "Description of the non-deductible expense." },
+            tutar: { type: Type.NUMBER, description: "The amount of the expense." },
+            gerekce: { type: Type.STRING, description: "Justification for why this is considered a non-deductible expense." },
+            dayanakMevzuat: { type: Type.STRING, description: "The legal article or reference for the non-deductibility (e.g., KVK Madde 11/1-d)." },
+            ilgiliHesapKodlari: {
+                type: Type.ARRAY,
+                items: { type: Type.STRING },
+                description: "List of related account codes from the trial balance (e.g., ['770', '689'])."
+            },
+        },
+        required: ['giderAciklamasi', 'tutar', 'gerekce', 'dayanakMevzuat', 'ilgiliHesapKodlari']
     }
 };
 
@@ -296,4 +263,13 @@ export const nakitAkimSchema = {
         donemSonu: { type: Type.OBJECT, properties: { aciklama: { type: Type.STRING }, tutar: { type: Type.NUMBER } }, required: ['aciklama', 'tutar'] },
     },
     required: ['isletme', 'yatirim', 'finansman', 'netArtis', 'donemBasi', 'donemSonu']
+};
+
+export const vatValuesSchema = {
+    type: Type.OBJECT,
+    properties: {
+        devredenKDV: { type: Type.NUMBER, description: "The 'Sonraki Döneme Devreden KDV' value from the VAT declaration for the current period." },
+        hesaplananKDV: { type: Type.NUMBER, description: "The 'Toplam Hesaplanan KDV' value from the VAT declaration for the current period." }
+    },
+    required: ['devredenKDV', 'hesaplananKDV']
 };

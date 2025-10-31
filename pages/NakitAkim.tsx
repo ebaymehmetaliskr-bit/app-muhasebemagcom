@@ -2,6 +2,8 @@ import React from 'react';
 import { NakitAkimData, NakitAkimBolum } from '../types';
 import { Card } from '../components/ui/Card';
 import { formatCurrency } from '../utils/formatters';
+import { DownloadIcon } from '../components/ui/Icons';
+import { exportToCsv } from '../utils/exportUtils';
 
 const SectionTable: React.FC<{ bolum: NakitAkimBolum }> = ({ bolum }) => (
     <div className="mb-6">
@@ -30,10 +32,56 @@ const SectionTable: React.FC<{ bolum: NakitAkimBolum }> = ({ bolum }) => (
 );
 
 export const NakitAkim: React.FC<{ data: NakitAkimData }> = ({ data }) => {
+    
+    const handleExport = () => {
+        const flatData: any[] = [];
+        const processBolum = (bolum: NakitAkimBolum) => {
+            bolum.items.forEach(item => {
+                flatData.push({
+                    bolum: bolum.bolumAdi,
+                    aciklama: item.aciklama,
+                    tutar: item.tutar,
+                });
+            });
+            flatData.push({
+                bolum: bolum.bolumAdi,
+                aciklama: `Bölüm Toplamı`,
+                tutar: bolum.toplam,
+            });
+        };
+
+        processBolum(data.isletme);
+        processBolum(data.yatirim);
+        processBolum(data.finansman);
+        
+        flatData.push({ bolum: 'ÖZET', aciklama: data.netArtis.aciklama, tutar: data.netArtis.tutar });
+        flatData.push({ bolum: 'ÖZET', aciklama: data.donemBasi.aciklama, tutar: data.donemBasi.tutar });
+        flatData.push({ bolum: 'ÖZET', aciklama: data.donemSonu.aciklama, tutar: data.donemSonu.tutar });
+
+        const headers = [
+            { key: 'bolum', label: 'Bölüm' },
+            { key: 'aciklama', label: 'Açıklama' },
+            { key: 'tutar', label: 'Tutar' },
+        ];
+        exportToCsv('nakit_akim', flatData, headers);
+    };
+
     return (
         <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-white">Nakit Akım Tablosu (Dolaylı Yöntem)</h2>
-            <p className="text-gray-400 -mt-4">Şirketin nakit giriş ve çıkışlarının kaynakları ve kullanım yerleri.</p>
+            <div className="flex justify-between items-start">
+                <div>
+                    <h2 className="text-2xl font-bold text-white">Nakit Akım Tablosu (Dolaylı Yöntem)</h2>
+                    <p className="text-gray-400">Şirketin nakit giriş ve çıkışlarının kaynakları ve kullanım yerleri.</p>
+                </div>
+                <button
+                    onClick={handleExport}
+                    className="flex-shrink-0 flex items-center gap-2 px-3 py-2 text-sm font-semibold text-white bg-green-600 hover:bg-green-700 rounded-md transition-colors"
+                    title="Excel'e Aktar"
+                >
+                    <DownloadIcon className="w-4 h-4" />
+                    <span>Aktar</span>
+                </button>
+            </div>
 
             <Card>
                 <SectionTable bolum={data.isletme} />

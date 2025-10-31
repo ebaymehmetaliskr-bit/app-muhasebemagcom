@@ -5,7 +5,6 @@ import { Dashboard } from './Dashboard';
 import { Mizan } from './Mizan';
 import { Bilanco } from './Bilanco';
 import { GelirGider } from './GelirGider';
-import { RasyoAnalizi } from './RasyoAnalizi';
 import { DikeyAnaliz } from './DikeyAnaliz';
 import { YatayAnaliz } from './YatayAnaliz';
 import { VergiselAnaliz } from './VergiselAnaliz';
@@ -16,6 +15,11 @@ import { Loader } from '../components/ui/Loader';
 import { KurganAnalizi } from './KurganAnalizi';
 import { ProgressLoader } from '../components/ui/ProgressLoader';
 import { NakitAkim } from './NakitAkim';
+import { KKEGAnalizi } from './KKEGAnalizi';
+import { FinansalYapiOranlari } from './FinansalYapiOranlari';
+import { LikiditeOranlari } from './LikiditeOranlari';
+import { DevirHizlari } from './DevirHizlari';
+import { KarlilikOranlari } from './KarlilikOranlari';
 
 async function extractTextFromPdf(file: File, onProgress: (progress: number) => void): Promise<string> {
     const pdfjsLib = (window as any).pdfjsLib;
@@ -44,6 +48,7 @@ export const MainApp: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [parsingProgress, setParsingProgress] = useState<number>(0);
     const [analysisStep, setAnalysisStep] = useState<string>('');
+    const [highlightedAccountCode, setHighlightedAccountCode] = useState<string | null>(null);
 
     const handleAnalysis = useCallback(async (file: File) => {
         setIsLoading(true);
@@ -86,6 +91,11 @@ export const MainApp: React.FC = () => {
         setAnalysisData(null);
         setCurrentPage('Dashboard');
     };
+    
+    const handleHighlightAccount = (hesapKodu: string) => {
+        setHighlightedAccountCode(hesapKodu);
+        setCurrentPage('Mizan');
+    };
 
     const renderPage = () => {
         if (!analysisData) return null;
@@ -94,21 +104,39 @@ export const MainApp: React.FC = () => {
             case 'Dashboard':
                 return <Dashboard data={analysisData} />;
             case 'Mizan':
-                return <Mizan data={analysisData.mizan} />;
+                return <Mizan 
+                    data={analysisData.mizan} 
+                    highlightedAccountCode={highlightedAccountCode}
+                    onHighlightComplete={() => setHighlightedAccountCode(null)}
+                />;
             case 'Bilanço':
                 return <Bilanco data={analysisData.bilanco} />;
             case 'Gelir ve Gider':
                 return <GelirGider data={analysisData.gelirGider} />;
             case 'Finansal Yapı Oranları':
+                return <FinansalYapiOranlari data={analysisData.rasyolar.finansalYapi} />;
             case 'Likidite Oranları':
+                 return <LikiditeOranlari data={analysisData.rasyolar.likidite} />;
             case 'Devir Hızları':
-                return <RasyoAnalizi data={analysisData.rasyolar} />;
+                 return <DevirHizlari data={analysisData.rasyolar.devirHizlari} />;
+            case 'Kârlılık Oranları':
+                return <KarlilikOranlari data={analysisData.rasyolar.karlilik} />;
             case 'Dikey Analiz':
                 return <DikeyAnaliz bilancoData={analysisData.bilanco} gelirGiderData={analysisData.gelirGider} />;
             case 'Yatay Analiz':
                 return <YatayAnaliz bilancoData={analysisData.bilanco} gelirGiderData={analysisData.gelirGider} />;
             case 'Vergisel Analiz':
-                return <VergiselAnaliz data={analysisData.vergiselAnaliz} pdfText={analysisData.pdfText || ''} mizanData={analysisData.mizan} />;
+                return <VergiselAnaliz 
+                    data={analysisData.vergiselAnaliz} 
+                    pdfText={analysisData.pdfText || ''} 
+                    mizanData={analysisData.mizan}
+                    onHighlightAccount={handleHighlightAccount}
+                />;
+            case 'KKEG Analizi':
+                return <KKEGAnalizi
+                    data={analysisData.kkegAnalizi}
+                    onHighlightAccount={handleHighlightAccount}
+                />;
             case 'Kurgan Analizi':
                 return <KurganAnalizi data={analysisData.kurganAnalizi} />;
             case 'Nakit Akım':

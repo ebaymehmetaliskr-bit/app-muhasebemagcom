@@ -1,68 +1,51 @@
 import React, { useState } from 'react';
 import { KurganAnaliz, KurganKriterAnalizi } from '../types';
 import { Card } from '../components/ui/Card';
-import { ChecklistIcon, InfoIcon, ReportIcon, VergiselAnalizIcon, WarningIcon } from '../components/ui/Icons';
-import { Modal } from '../components/ui/Modal';
-
-
-const getRiskColorClasses = (risk: 'Düşük' | 'Orta' | 'Yüksek' | 'Tespit Edilmedi') => {
-    switch (risk) {
-        case 'Düşük':
-            return {
-                bg: 'bg-green-600', text: 'text-green-100', border: 'border-green-500', iconText: 'text-green-400'
-            };
-        case 'Orta':
-            return {
-                bg: 'bg-yellow-600', text: 'text-yellow-100', border: 'border-yellow-500', iconText: 'text-yellow-400'
-            };
-        case 'Yüksek':
-            return {
-                bg: 'bg-red-600', text: 'text-red-100', border: 'border-red-500', iconText: 'text-red-400'
-            };
-        case 'Tespit Edilmedi':
-        default:
-            return {
-                bg: 'bg-slate-600', text: 'text-slate-100', border: 'border-slate-500', iconText: 'text-slate-400'
-            };
-    }
-};
-
-const KriterAnalizCard: React.FC<{ kriter: KurganKriterAnalizi, onSelect: () => void }> = ({ kriter, onSelect }) => {
-    const { bg, text } = getRiskColorClasses(kriter.riskDurumu);
-
-    return (
-        <Card className={`group transition-all hover:shadow-lg hover:border-blue-500/50 flex flex-col justify-between`} onClick={onSelect}>
-            <div>
-                <div className="flex justify-between items-start mb-3">
-                    <h4 className="font-bold text-white pr-2 flex-1">{kriter.kriterAdi}</h4>
-                    <span className={`text-xs font-bold px-2 py-1 rounded ${bg} ${text}`}>
-                        {kriter.riskDurumu}
-                    </span>
-                </div>
-                <p className="text-xs text-gray-400 leading-relaxed mb-3">
-                    {kriter.analizDetayi.substring(0, 100)}{kriter.analizDetayi.length > 100 ? '...' : ''}
-                </p>
-            </div>
-            <div className="flex justify-between items-center mt-auto pt-2 border-t border-slate-700/50">
-                <div className="flex flex-wrap gap-1">
-                     {kriter.ilgiliHesaplar.slice(0, 3).map(kod => (
-                        <span key={kod} className="text-[10px] font-semibold bg-slate-600 text-white px-2 py-0.5 rounded">
-                            {kod}
-                        </span>
-                    ))}
-                    {kriter.ilgiliHesaplar.length > 3 && <span className="text-[10px] text-gray-400">...</span>}
-                </div>
-                <InfoIcon className="w-4 h-4 text-gray-500 group-hover:text-blue-400 transition-colors" />
-            </div>
-        </Card>
-    );
-};
+import { ChecklistIcon, ReportIcon, VergiselAnalizIcon } from '../components/ui/Icons';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from 'recharts';
+import { KriterAnalizCard, getRiskColorClasses } from '../components/kurgan/KriterAnalizCard';
+import { KriterDetailModal } from '../components/kurgan/KriterDetailModal';
 
 
 export const KurganAnalizi: React.FC<{ data: KurganAnaliz }> = ({ data }) => {
     const [selectedKriter, setSelectedKriter] = useState<KurganKriterAnalizi | null>(null);
     
     const { bg: genelBg, text: genelText, iconText } = getRiskColorClasses(data.genelRiskDurumu);
+    
+    const riskLevelMap: { [key: string]: { value: number; color: string; label: string } } = {
+        'Yüksek': { value: 3, color: '#ef4444', label: 'Yüksek' },
+        'Orta': { value: 2, color: '#f59e0b', label: 'Orta' },
+        'Düşük': { value: 1, color: '#10b981', label: 'Düşük' },
+        'Tespit Edilmedi': { value: 0, color: '#6b7280', label: 'Tespit Edilmedi' },
+    };
+
+    const chartData = data.kriterAnalizleri.map(kriter => ({
+        name: kriter.kriterAdi,
+        riskValue: riskLevelMap[kriter.riskDurumu]?.value ?? 0,
+        fill: riskLevelMap[kriter.riskDurumu]?.color ?? '#6b7280',
+        riskLabel: riskLevelMap[kriter.riskDurumu]?.label ?? 'N/A',
+    }));
+
+    const formatXAxisTick = (tickValue: number) => {
+        if (tickValue === 1) return 'Düşük';
+        if (tickValue === 2) return 'Orta';
+        if (tickValue === 3) return 'Yüksek';
+        return '';
+    };
+
+    const CustomTooltip = ({ active, payload }: any) => {
+        if (active && payload && payload.length) {
+            const data = payload[0].payload;
+            return (
+                <div className="bg-slate-800/80 backdrop-blur-sm p-3 rounded-lg border border-slate-600 shadow-xl text-sm">
+                    <p className="font-bold text-white mb-2">{data.name}</p>
+                    <p style={{ color: data.fill }}>Risk Durumu: <span className="font-semibold">{data.riskLabel}</span></p>
+                </div>
+            );
+        }
+        return null;
+    };
+
 
     return (
         <div className="space-y-8">
@@ -88,6 +71,45 @@ export const KurganAnalizi: React.FC<{ data: KurganAnaliz }> = ({ data }) => {
                 </Card>
             </div>
 
+            <Card>
+                <h3 className="text-lg font-semibold text-gray-200 mb-4">
+                    Kriter Bazlı Risk Seviyeleri Grafiği
+                </h3>
+                <ResponsiveContainer width="100%" height={350}>
+                    <BarChart
+                        data={chartData}
+                        layout="vertical"
+                        margin={{ top: 5, right: 30, left: 120, bottom: 5 }}
+                    >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                        <XAxis
+                            type="number"
+                            domain={[0, 3]}
+                            ticks={[0, 1, 2, 3]}
+                            tickFormatter={formatXAxisTick}
+                            stroke="#9ca3af"
+                            fontSize={12}
+                            tick={{ fill: '#d1d5db' }}
+                        />
+                        <YAxis
+                            dataKey="name"
+                            type="category"
+                            stroke="#9ca3af"
+                            fontSize={12}
+                            tick={{ fill: '#d1d5db' }}
+                            width={150}
+                            interval={0}
+                        />
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(100,116,139,0.1)' }} />
+                        <Bar dataKey="riskValue" barSize={20}>
+                            {chartData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.fill} />
+                            ))}
+                        </Bar>
+                    </BarChart>
+                </ResponsiveContainer>
+            </Card>
+
             <div>
                 <h3 className="text-xl font-bold text-white mb-4">13 Kast Değerlendirme Kriteri Analizi</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -112,50 +134,10 @@ export const KurganAnalizi: React.FC<{ data: KurganAnaliz }> = ({ data }) => {
                 </ul>
             </Card>
 
-            <Modal
-                isOpen={!!selectedKriter}
+            <KriterDetailModal
+                kriter={selectedKriter}
                 onClose={() => setSelectedKriter(null)}
-                title={selectedKriter?.kriterAdi ?? 'Kriter Detayı'}
-            >
-                {selectedKriter && (
-                     <div className="space-y-5 text-sm">
-                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-3 bg-slate-700/50 rounded-lg">
-                             <div>
-                                 <p className="text-xs text-gray-400 mb-1">Risk Durumu</p>
-                                <span className={`px-3 py-1 text-sm font-bold text-white rounded-full ${getRiskColorClasses(selectedKriter.riskDurumu).bg}`}>
-                                     {selectedKriter.riskDurumu}
-                                 </span>
-                             </div>
-                             <div className="sm:text-right">
-                                 <p className="text-xs text-gray-400 mb-1">Mevzuat Referansı</p>
-                                 <span className="text-xs font-mono bg-slate-600 text-slate-100 px-2 py-1 rounded">{selectedKriter.mevzuatReferansi}</span>
-                             </div>
-                         </div>
-
-                        <div>
-                            <h4 className="font-semibold text-gray-300 mb-2 flex items-center gap-2">
-                                <WarningIcon className="w-5 h-5 text-orange-400" />AI Analiz Detayı
-                            </h4>
-                            <div className="p-3 bg-slate-900/40 border border-slate-700 text-gray-300 text-sm rounded-md">
-                                <p className="leading-relaxed whitespace-pre-wrap">{selectedKriter.analizDetayi}</p>
-                            </div>
-                        </div>
-
-                         <div>
-                             <h4 className="font-semibold text-gray-300 mb-2">Analizde Kullanılan İlgili Hesaplar</h4>
-                             <div className="flex flex-wrap gap-2">
-                                 {selectedKriter.ilgiliHesaplar.length > 0 ?
-                                     selectedKriter.ilgiliHesaplar.map(kod => (
-                                         <span key={kod} className="text-xs font-semibold bg-blue-600 text-white px-2 py-1 rounded">
-                                             {kod}
-                                         </span>
-                                     )) : <span className="text-xs text-gray-500">Bu analiz için spesifik hesap kullanılmadı.</span>
-                                 }
-                             </div>
-                         </div>
-                     </div>
-                )}
-            </Modal>
+            />
         </div>
     );
 };

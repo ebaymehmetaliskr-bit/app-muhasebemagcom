@@ -1,7 +1,6 @@
 
 
-
-import { AnalysisData } from '../types';
+import { AnalysisData, KKEGItem } from '../types';
 
 export const mockAnalysisData: AnalysisData = {
   pdfText: 'Bu alanda analiz edilen PDF dosyasının tam metni yer alacaktır. Detaylı raporlama gibi özellikler bu metni bağlam olarak kullanır.',
@@ -11,6 +10,7 @@ export const mockAnalysisData: AnalysisData = {
       bilanco: 77,
       gelirGider: 33,
       analizler: 12,
+      kkeg: 4,
     },
     aktifYapi: [
       { name: 'Dönen Varlıklar', value: 60 },
@@ -80,49 +80,47 @@ export const mockAnalysisData: AnalysisData = {
   rasyolar: {
     finansalYapi: {
       title: 'Finansal Yapı Oranları',
+      ozet: 'İşletmenin finansal yapısı oldukça güçlüdür. Cari dönemde borçluluk azalmış, öz kaynakların varlıklar içindeki payı artmıştır. Bu durum, şirketin finansal riskinin düştüğünü ve borç ödeme kapasitesinin iyileştiğini göstermektedir.',
       ratios: [
-        { name: 'Kaldıraç Oranı', cariDonem: 0.366, oncekiDonem: 0.459, formula: 'Formül: Kısa Vadeli Yabancı Kaynaklar + Uzun Vadeli Yabancı Kaynaklar / Varlık (Aktif) Toplamı' },
-        { name: 'Öz Kaynak Oranı', cariDonem: 0.634, oncekiDonem: 0.541, formula: 'Formül: Öz Kaynaklar / Varlık (Aktif) Toplamı' },
-        { name: 'Yabancı Kaynak Oranı', cariDonem: 0.180, oncekiDonem: 0.287, formula: 'Kısa Vadeli Yabancı Kaynak / Kaynak Toplamı' },
+        { name: 'Kaldıraç Oranı', cariDonem: 0.366, oncekiDonem: 0.459, formula: 'Toplam Yabancı Kaynaklar / Toplam Varlıklar', yorum: 'Cari dönemde varlıkların %36.6\'sı yabancı kaynaklarla finanse edilmiş. Önceki döneme göre borçluluk azalmış, bu durum finansal riskin düştüğünü gösterir. İdeal oran sektöre göre değişir, ancak %50 civarı makul kabul edilebilir.' },
+        { name: 'Öz Kaynak Oranı', cariDonem: 0.634, oncekiDonem: 0.541, formula: 'Öz Kaynaklar / Toplam Varlıklar', yorum: 'İşletmenin varlıklarının %63.4\'ü öz kaynaklarla finanse ediliyor. Bu, şirketin finansal yapısının güçlü olduğunu ve borca bağımlılığının azaldığını gösterir. Artış trendi olumludur.' },
+        { name: 'Borç / Öz Kaynak Oranı', cariDonem: 0.577, oncekiDonem: 0.848, formula: 'Toplam Yabancı Kaynaklar / Öz Kaynaklar', yorum: 'Cari dönemde her 1 TL\'lik öz kaynağa karşılık 0.58 TL borç bulunmaktadır. Oranın 1\'den küçük olması ve düşüş trendinde olması, borç ödeme kapasitesinin arttığını ve alacaklılar için güvencenin yükseldiğini gösterir.' },
+        { name: 'Duran Varlıkların Devamlı Sermayeye Oranı', cariDonem: 0.85, oncekiDonem: 0.92, formula: 'Duran Varlıklar / (Öz Kaynaklar + Uzun Vadeli Y.K.)', yorum: 'Duran varlıklar, uzun vadeli kaynaklarla finanse edilmektedir (oran < 1). Bu, "altın kural" olarak bilinen duruma uygun ve olumlu bir göstergedir. İşletme, yatırım harcamalarını doğru kaynaklarla finanse etmektedir.' },
+        { name: 'Kısa Vadeli Yabancı Kaynak Oranı', cariDonem: 0.250, oncekiDonem: 0.300, formula: 'Kısa Vadeli Yabancı Kaynaklar / Toplam Varlıklar', yorum: 'Varlıkların ne kadarının kısa vadeli borçlarla finanse edildiğini gösterir. Oranın düşmesi, kısa vadeli borç baskısının azaldığını gösterir ve olumludur.' },
+        { name: 'Uzun Vadeli Yabancı Kaynak Oranı', cariDonem: 0.116, oncekiDonem: 0.159, formula: 'Uzun Vadeli Yabancı Kaynaklar / Toplam Varlıklar', yorum: 'Varlıkların ne kadarının uzun vadeli borçlarla finanse edildiğini gösterir. Şirketin uzun vadeli borçlanma yapısını analiz etmek için kullanılır.' },
+        { name: 'Duran Varlıkların Özkaynaklara Oranı', cariDonem: 0.90, oncekiDonem: 1.10, formula: 'Duran Varlıklar / Öz Kaynaklar', yorum: 'Duran varlıkların özkaynaklar tarafından ne ölçüde karşılandığını gösterir. Oranın 1\'den küçük olması, duran varlıkların tamamen özkaynaklarla finanse edildiğini gösterir ve bu ideal bir durumdur.' }
       ],
     },
     likidite: {
       title: 'Likidite Oranları',
+      ozet: 'Şirketin likidite durumu son derece sağlıklıdır. Tüm likidite oranları ideal seviyelerin üzerinde ve artış trendindedir. Bu, şirketin kısa vadeli yükümlülüklerini karşılama konusunda hiçbir zorluk yaşamadığını göstermektedir.',
       ratios: [
-        { name: 'Cari Oran', cariDonem: 2.162, oncekiDonem: 1.139 },
-        { name: 'Asit-Test Oranı', cariDonem: 2.039, oncekiDonem: 1.67 },
-        { name: 'Nakit Oranı', cariDonem: 0.554, oncekiDonem: 0.243 },
-        { name: 'Ticari Alacak/Borç Oranı', cariDonem: 1.921, oncekiDonem: 2.109 },
+        { name: 'Cari Oran', cariDonem: 2.162, oncekiDonem: 1.139, formula: 'Dönen Varlıklar / Kısa Vadeli Yabancı Kaynaklar', yorum: 'İşletmenin kısa vadeli borçlarını ödeme gücü oldukça iyi durumda ve önceki döneme göre önemli bir artış göstermiş. 1.5-2.0 arası ideal kabul edilir, 2\'nin üzeri likidite fazlasına işaret edebilir.' },
+        { name: 'Asit-Test Oranı', cariDonem: 2.039, oncekiDonem: 1.067, formula: '(Dönen Varlıklar - Stoklar) / Kısa Vadeli Yabancı Kaynaklar', yorum: 'Stoklar hariç tutulduğunda dahi şirketin borç ödeme gücü çok yüksek. İdeal değer 1\'dir. Bu oran, stoklara bağımlılığın çok düşük olduğunu gösteriyor.' },
+        { name: 'Nakit Oranı', cariDonem: 0.554, oncekiDonem: 0.243, formula: '(Hazır Değerler + Menkul Kıymetler) / Kısa Vadeli Yabancı Kaynaklar', yorum: 'İşletmenin en likit varlıkları, kısa vadeli borçların %55\'ini karşılayabiliyor. 0.20\'nin üzerindeki bu değer, şirketin nakit pozisyonunun çok güçlü olduğunu gösterir.' },
       ],
-      dagilim: [
-          {name: 'Hazır Değerler', value: 30},
-          {name: 'Menkul Kıymetler', value: 10},
-          {name: 'Kısa Vadeli Alacaklar', value: 45},
-          {name: 'Stoklar', value: 10},
-          {name: 'Diğer', value: 5},
-      ]
     },
     devirHizlari: {
-      title: 'Devir Hızları',
+      title: 'Devir Hızları (Faaliyet Oranları)',
+      ozet: 'İşletme, faaliyet verimliliğini önemli ölçüde artırmıştır. Stok ve alacak devir hızlarındaki artış, şirketin varlıklarını daha etkin kullandığını ve nakit döngüsünü iyileştirdiğini kanıtlamaktadır.',
       ratios: [
-        { name: 'Stok Devir Hızı', cariDonem: 73.54, oncekiDonem: 47.67 },
-        { name: 'Alacak Devir Hızı', cariDonem: 6.69, oncekiDonem: 5.52 },
-        { name: 'Aktif Devir Hızı', cariDonem: 1.79, oncekiDonem: 1.45 },
+        { name: 'Stok Devir Hızı', cariDonem: 73.54, oncekiDonem: 47.67, formula: 'Satışların Maliyeti / Ortalama Stoklar', yorum: 'Stokların paraya çevrilme hızı önemli ölçüde artmış. Bu, stok yönetiminin etkin olduğunu ve stokların hızla satıldığını gösterir. Yüksek devir hızı genellikle olumludur.' },
+        { name: 'Stokta Kalma Süresi (Gün)', cariDonem: 4.9, oncekiDonem: 7.6, formula: '365 / Stok Devir Hızı', yorum: 'Stoklar ortalama 4.9 günde bir yenileniyor. Sürenin kısalması, stokların verimli yönetildiğini ve atıl stok riskinin düşük olduğunu gösterir.' },
+        { name: 'Alacak Devir Hızı', cariDonem: 6.69, oncekiDonem: 5.52, formula: 'Net Satışlar / Ortalama Ticari Alacaklar', yorum: 'Alacakların tahsil edilme hızı artmış. Bu, şirketin alacak yönetiminde daha başarılı olduğunu ve nakit akışını iyileştirdiğini gösterir.' },
+        { name: 'Ortalama Tahsil Süresi (Gün)', cariDonem: 54.5, oncekiDonem: 66.1, formula: '365 / Alacak Devir Hızı', yorum: 'Alacakların ortalama tahsil süresi 54.5 güne düşmüş. Bu olumlu bir gelişmedir ve şirketin sermaye bağlama süresini kısaltır.' },
+        { name: 'Aktif Devir Hızı', cariDonem: 1.79, oncekiDonem: 1.45, formula: 'Net Satışlar / Ortalama Toplam Varlıklar', yorum: 'Şirket, varlıklarını satış yaratmak için daha verimli kullanıyor. Oranın yükselmesi, varlık kullanım etkinliğinin arttığını gösterir.' },
       ],
-      karsilastirma: [
-        { name: 'Stok Devir Hızı', 'Cari Dönem': 73.54, 'Önceki Dönem': 47.67 },
-        { name: 'Alacak Devir Hızı', 'Cari Dönem': 6.69, 'Önceki Dönem': 5.52 },
-        { name: 'Aktif Devir Hızı', 'Cari Dönem': 1.79, 'Önceki Dönem': 1.45 },
-        { name: 'Çalışma Sermayesi Devir Hızı', 'Cari Dönem': 10, 'Önceki Dönem': 8 },
-        { name: 'Borç Ödeme Gücü', 'Cari Dönem': 60, 'Önceki Dönem': 55 },
-      ]
     },
-    karlilik: [
-        { name: 'Brüt Satış Kar/Zarar', 'Cari Dönem': 57000000, 'Önceki Dönem': 20000000 },
-        { name: 'Faaliyet Kar/Zarar', 'Cari Dönem': 43000000, 'Önceki Dönem': 16000000 },
-        { name: 'Olağan Kar/Zarar', 'Cari Dönem': 45000000, 'Önceki Dönem': 17000000 },
-        { name: 'Dönem Net Kar/Zarar', 'Cari Dönem': 32000000, 'Önceki Dönem': 11000000 },
-    ]
+    karlilik: {
+      title: 'Kârlılık Oranları',
+      ozet: 'Şirketin kârlılığı tüm metriklerde önemli bir iyileşme göstermiştir. Satış kârlılığı, öz kaynak ve varlık kârlılığındaki artışlar, hem operasyonel verimliliğin hem de genel yönetim performansının arttığına işaret etmektedir.',
+      ratios: [
+          { name: 'Brüt Kâr Marjı', cariDonem: 0.131, oncekiDonem: 0.078, formula: 'Brüt Satış Kârı / Net Satışlar', yorum: 'Satılan malın maliyetinin kontrolünde iyileşme var. Satışların her 100 TL\'si 13.1 TL brüt kâr yaratıyor. Marjdaki artış çok olumlu.' },
+          { name: 'Net Kâr Marjı', cariDonem: 0.073, oncekiDonem: 0.043, formula: 'Dönem Net Kârı / Net Satışlar', yorum: 'Tüm giderler düşüldükten sonra satışlardan elde edilen net kârlılık oranı artmış. Bu, şirketin genel verimliliğinin ve kârlılığının arttığını gösterir.' },
+          { name: 'Öz Kaynak Kârlılığı (ROE)', cariDonem: 0.25, oncekiDonem: 0.18, formula: 'Dönem Net Kârı / Ortalama Öz Kaynaklar', yorum: 'Ortakların yatırdığı sermayenin kârlılığı artmış. Her 100 TL\'lik öz kaynak 25 TL net kâr yaratıyor. Bu, hissedarlar için olumlu bir göstergedir.' },
+          { name: 'Varlıkların Kârlılığı (ROA)', cariDonem: 0.15, oncekiDonem: 0.10, formula: 'Dönem Net Kârı / Ortalama Toplam Varlıklar', yorum: 'Şirketin varlıklarını kâr yaratmak için ne kadar etkin kullandığı artmış. Bu, genel yönetim performansının iyileştiğini gösterir.' },
+      ]
+    }
   },
   vergiselAnaliz: [
     { hesapKodlari: ['122'], baslik: 'Çek ve Senetlerde Reeskont Uygulaması', kategori: 'Alacak Riskleri', durum: 'Hayır', aciklama: 'Güncel reeskont oranı ve hesaplama yönteminin yanı sıra, varsa borç senetlerinin reeskont işlemleri ve önceki yıllara ait iptallerin gözden geçirilmesi gerekmektedir.', uyariMesaji: 'VUK 281/285 uyarınca reeskont hesaplamaları TCMB oranlarına göre yapılmalıdır. Hatalı oran kullanımı vergi ziyaına yol açabilir.', mevzuatReferanslari: ['VUK Madde 281', 'VUK Madde 285'] },
@@ -146,6 +144,36 @@ export const mockAnalysisData: AnalysisData = {
     { hesapKodlari: ['25', '54'], baslik: 'Yatırım Teşvik Belgeleri Kullanımı', kategori: 'Varlık Riskleri', durum: 'Hayır', aciklama: 'Yatırım teşvik belgesi kapsamında yapılan harcamalar için uygulanan indirimli kurumlar vergisi, KDV istisnası gibi teşviklerin doğru uygulanıp uygulanmadığı kontrol edilmelidir.', mevzuatReferanslari: [] },
     { hesapKodlari: ['580', '570'], baslik: 'Zarar Mahsubu İşlemleri', kategori: 'Kar/Zarar ve Gider Riskleri', durum: 'Evet', aciklama: 'Geçmiş yıl mali zararlarının, ilgili dönem kârından mahsup edilirken 5 yıllık zaman aşımı süresine ve mahsup kurallarına uyulup uyulmadığı incelenmelidir.', mevzuatReferanslari: ['KVK Madde 9'] },
     { hesapKodlari: ['100', '102'], baslik: 'Kasa ve Banka Hesapları Mutabakatı', kategori: 'Varlık Riskleri', durum: 'Evet', aciklama: 'Dönem sonu kasa sayım tutanağı ile mizan kasa bakiyesinin ve banka ekstreleri ile mizan banka bakiyelerinin uyumlu olup olmadığı kontrol edilmelidir. Özellikle kasa hesabının yüksek bakiyeli olması vergisel riskler taşıyabilir.', mevzuatReferanslari: ['VUK'] },
+  ],
+  kkegAnalizi: [
+    {
+      giderAciklamasi: 'Binek otomobillere ait Motorlu Taşıtlar Vergisi (MTV)',
+      tutar: 15450.75,
+      gerekce: 'Gelir Vergisi Kanunu\'nun 40. maddesi ve Motorlu Taşıtlar Vergisi Kanunu\'nun 14. maddesi uyarınca, binek otomobillerine ait MTV, ticari kazancın tespitinde gider olarak kabul edilmez.',
+      dayanakMevzuat: 'MTV Kanunu Madde 14',
+      ilgiliHesapKodlari: ['770']
+    },
+    {
+      giderAciklamasi: 'Vergi Usul Kanununa göre düzenlenmemiş belgesiz giderler',
+      tutar: 8200.00,
+      gerekce: 'Vergi Usul Kanunu\'nda belirtilen fatura, perakende satış fişi gibi yasal belgelerle tevsik edilemeyen harcamalar gider olarak yazılamaz.',
+      dayanakMevzuat: 'VUK Madde 227',
+      ilgiliHesapKodlari: ['770', '760']
+    },
+    {
+      giderAciklamasi: 'Dönemle ilgili olmayan gelecek döneme ait giderler',
+      tutar: 25000.00,
+      gerekce: 'Dönemsellik ilkesi gereği, cari döneme ait olmayan ve gelecek hesap dönemlerini ilgilendiren giderler, ilgili dönemde giderleştirilmelidir. Bu tutar 180 hesaptan 770 hesaba yanlışlıkla virmanlanmıştır.',
+      dayanakMevzuat: 'VUK Madde 287',
+      ilgiliHesapKodlari: ['180', '770']
+    },
+    {
+      giderAciklamasi: 'Ödenen Vergi Cezaları ve Gecikme Zammı',
+      tutar: 5678.50,
+      gerekce: 'Kurumlar Vergisi Kanunu\'nun 11. maddesi uyarınca, her türlü vergi cezaları, para cezaları ve gecikme zamları kurum kazancının tespitinde gider olarak indirilemez.',
+      dayanakMevzuat: 'KVK Madde 11/1-d',
+      ilgiliHesapKodlari: ['689']
+    },
   ],
   kurganAnalizi: {
     genelRiskDurumu: 'Orta',
