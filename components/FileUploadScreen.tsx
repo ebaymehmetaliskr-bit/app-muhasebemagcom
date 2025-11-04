@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 interface FileUploadScreenProps {
     onAnalyze: (file: File, fileType: 'pdf' | 'excel') => void;
+    onUseMockData: () => void;
     error: string | null;
 }
 
@@ -13,12 +14,12 @@ const PDFIcon = () => (
 
 const ExcelIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-        <path d="M2 3a1 1 0 011-1h14a1 1 0 011 1v14a1 1 0 01-1 1H3a1 1 0 01-1-1V3zm2 2v2h12V5H4zm0 4v2h12V9H4zm0 4v2h12v-2H4z"/>
+        <path d="M2 3a1 1 0 011-1h14a1 1 0 011 1v14a1 1 0 01-1-1H3a1 1 0 01-1-1V3zm2 2v2h12V5H4zm0 4v2h12V9H4zm0 4v2h12v-2H4z"/>
     </svg>
 );
 
 
-export const FileUploadScreen: React.FC<FileUploadScreenProps> = ({ onAnalyze, error }) => {
+export const FileUploadScreen: React.FC<FileUploadScreenProps> = ({ onAnalyze, onUseMockData, error }) => {
     const [fileName, setFileName] = useState<string | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [fileType, setFileType] = useState<'pdf' | 'excel'>('pdf');
@@ -83,6 +84,15 @@ export const FileUploadScreen: React.FC<FileUploadScreenProps> = ({ onAnalyze, e
 
                     {error && <p className="mt-6 text-red-500">{error}</p>}
                     
+                    <div className="mt-6 border-t border-slate-700 pt-4">
+                        <button
+                            onClick={onUseMockData}
+                            className="w-full text-sm text-cyan-400 hover:text-cyan-300 hover:bg-slate-700/50 py-2 px-4 rounded-lg transition-colors"
+                        >
+                            Geliştirme için Test Verisi Yükle
+                        </button>
+                    </div>
+
                     <div className="mt-8 text-left text-xs text-gray-500 p-4 bg-slate-900/50 rounded-lg">
                         {fileType === 'excel' ? (
                             <>

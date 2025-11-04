@@ -46,18 +46,25 @@ export const performFullAnalysis = async (
         { type: 'kurumlarVergisi', message: 'Kurumlar Vergisi hesaplanıyor...' },
     ];
     
-    const results: any = {};
+    onProgress("Tüm analizler paralel olarak başlatılıyor...");
+    
+    const promises = analysisSteps.map(step => 
+        callApi(`/api/analyze`, { dataSourceText, analysisType: step.type })
+    );
 
+    const promiseResults = await Promise.all(promises);
+
+    onProgress("Analiz sonuçları birleştiriliyor...");
+
+    const results: { [key: string]: any } = {};
     if (initialMizan) {
         results.mizan = initialMizan;
     }
 
-    for (const step of analysisSteps) {
-        onProgress(step.message);
-        results[step.type] = await callApi(`/api/analyze`, { dataSourceText, analysisType: step.type });
-    }
+    promiseResults.forEach((res, index) => {
+        results[analysisSteps[index].type] = res;
+    });
 
-    onProgress("Raporlar birleştiriliyor...");
 
     const mizanData = results.mizan as MizanItem[];
     const bilancoData = results.bilanco as BilancoData;

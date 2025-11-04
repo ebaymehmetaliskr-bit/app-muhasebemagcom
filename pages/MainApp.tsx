@@ -22,6 +22,7 @@ import { DevirHizlari } from './DevirHizlari';
 import { KarlilikOranlari } from './KarlilikOranlari';
 import { KurumlarVergisi } from './KurumlarVergisi';
 import { processExcelFile } from '../utils/excelParser';
+import { mockAnalysisData } from '../data/mockAnalysisData';
 
 
 async function extractTextFromPdf(file: File, onProgress: (progress: number) => void): Promise<string> {
@@ -93,6 +94,11 @@ export const MainApp: React.FC = () => {
             setIsLoading(false);
         }
     }, []);
+    
+    const handleUseMockData = useCallback(() => {
+        setAnalysisData(mockAnalysisData);
+        setCurrentPage('Dashboard');
+    }, []);
 
     const resetAnalysis = () => {
         setAnalysisData(null);
@@ -163,7 +169,7 @@ export const MainApp: React.FC = () => {
     }
 
     if (!analysisData) {
-        return <FileUploadScreen onAnalyze={handleAnalysis} error={error} />;
+        return <FileUploadScreen onAnalyze={handleAnalysis} onUseMockData={handleUseMockData} error={error} />;
     }
 
     return (
