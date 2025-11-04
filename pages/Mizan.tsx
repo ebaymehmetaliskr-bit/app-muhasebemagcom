@@ -1,8 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { MizanItem } from '../types';
 import { Card } from '../components/ui/Card';
-import { ArrowUpIcon, ArrowDownIcon, DownloadIcon } from '../components/ui/Icons';
-import { formatCurrency } from '../utils/formatters';
+import { DownloadIcon, ArrowUpIcon, ArrowDownIcon } from '../components/ui/Icons';
+import { formatCurrency, formatPercent } from '../utils/formatters';
 import { exportToCsv } from '../utils/exportUtils';
 
 interface MizanProps {
@@ -12,19 +12,21 @@ interface MizanProps {
 }
 
 const ChangeIndicator: React.FC<{ change: number }> = ({ change }) => {
-    if (change === 0) return <span className="text-gray-500">-</span>;
+    if (isNaN(change) || !isFinite(change) || change === 0) {
+        return <span className="text-gray-500">-</span>;
+    }
+
     const isPositive = change > 0;
-    const isInfinite = !isFinite(change);
+    const color = isPositive ? 'text-green-400' : 'text-red-400';
 
     return (
-        <div className={`flex items-center justify-end px-2 py-1 rounded-md text-xs font-bold ${isPositive ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
+        <span className={`flex items-center justify-end font-semibold ${color}`}>
             {isPositive ? <ArrowUpIcon /> : <ArrowDownIcon />}
-            <span className="ml-1">
-                {isInfinite ? '100.0%' : `${Math.abs(change).toFixed(1)}%`}
-            </span>
-        </div>
+            {formatPercent(Math.abs(change))}
+        </span>
     );
 };
+
 
 export const Mizan: React.FC<MizanProps> = ({ data, highlightedAccountCode, onHighlightComplete }) => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -108,15 +110,11 @@ export const Mizan: React.FC<MizanProps> = ({ data, highlightedAccountCode, onHi
                                 <th scope="col" className="px-6 py-4 font-medium text-left">Hesap Adı</th>
                                 <th scope="col" className="px-6 py-4 font-medium text-right">Önceki Dönem</th>
                                 <th scope="col" className="px-6 py-4 font-medium text-right">Cari Dönem</th>
-                                <th scope="col" className="px-6 py-4 font-medium text-right">Değişim</th>
+                                <th scope="col" className="px-6 py-4 font-medium text-right">Değişim (%)</th>
                             </tr>
                         </thead>
                         <tbody>
                             {filteredData.map((item) => {
-                                const change = item.oncekiDonem === 0 
-                                    ? (item.cariDonem > 0 ? Infinity : 0) 
-                                    : ((item.cariDonem - item.oncekiDonem) / Math.abs(item.oncekiDonem)) * 100;
-                                
                                 let rowClass;
                                 if (item.isMain) {
                                     rowClass = 'bg-blue-900/30 font-bold hover:bg-blue-900/50 hover:border-blue-400';
@@ -125,6 +123,10 @@ export const Mizan: React.FC<MizanProps> = ({ data, highlightedAccountCode, onHi
                                 } else {
                                     rowClass = 'hover:bg-slate-700/50 hover:border-slate-500';
                                 }
+                                
+                                const change = item.oncekiDonem !== 0 
+                                    ? ((item.cariDonem - item.oncekiDonem) / Math.abs(item.oncekiDonem)) * 100 
+                                    : (item.cariDonem !== 0 ? Infinity : 0);
 
                                 return (
                                     <tr key={item.hesapKodu} id={`mizan-row-${item.hesapKodu}`} className={`border-b border-slate-700 border-l-2 border-transparent transition-all duration-150 ${rowClass}`}>
@@ -132,9 +134,7 @@ export const Mizan: React.FC<MizanProps> = ({ data, highlightedAccountCode, onHi
                                         <td className="px-6 py-4 font-medium text-white">{item.hesapAdi}</td>
                                         <td className="px-6 py-4 text-right font-mono">{formatCurrency(item.oncekiDonem)}</td>
                                         <td className="px-6 py-4 text-right font-mono">{formatCurrency(item.cariDonem)}</td>
-                                        <td className="px-6 py-4 text-right">
-                                            {!item.isMain && !item.isSub && <ChangeIndicator change={change} />}
-                                        </td>
+                                        <td className="px-6 py-4 text-right font-mono"><ChangeIndicator change={change} /></td>
                                     </tr>
                                 );
                             })}

@@ -16,7 +16,7 @@ const detailedTaxReportItemSchema = {
             items: { type: Type.STRING },
             description: 'A list of actionable steps to mitigate the risk.'
         },
-        potansiyelVergiCezalari: { type: Type.STRING, description: 'Description of potential tax penalties.' },
+        potensiyelVergiCezalari: { type: Type.STRING, description: 'Description of potential tax penalties.' },
     },
     required: ['baslik', 'riskAnalizi', 'mevzuatReferanslari', 'yapilmasiGerekenler', 'potensiyelVergiCezalari']
 };
@@ -114,12 +114,12 @@ const rasyoItemSchema = {
     type: Type.OBJECT,
     properties: {
         name: { type: Type.STRING },
-        cariDonem: { type: Type.NUMBER },
         oncekiDonem: { type: Type.NUMBER },
+        cariDonem: { type: Type.NUMBER },
         formula: { type: Type.STRING, description: "Mathematical formula for the ratio." },
         yorum: { type: Type.STRING, description: "AI-generated interpretation of the ratio." },
     },
-    required: ['name', 'cariDonem', 'oncekiDonem', 'formula', 'yorum']
+    required: ['name', 'oncekiDonem', 'cariDonem', 'formula', 'yorum']
 };
 
 const rasyoGrupSchema = {
@@ -264,6 +264,35 @@ export const nakitAkimSchema = {
     },
     required: ['isletme', 'yatirim', 'finansman', 'netArtis', 'donemBasi', 'donemSonu']
 };
+
+export const kurumlarVergisiSchema = {
+    type: Type.OBJECT,
+    properties: {
+        ticariKar: { type: Type.NUMBER },
+        kkegToplam: { type: Type.NUMBER },
+        zararIfaGideri: { type: Type.NUMBER },
+        digerIlaveler: { type: Type.NUMBER },
+        toplamIlaveler: { type: Type.NUMBER },
+        karIlavelerToplami: { type: Type.NUMBER },
+        gecmisYilZararlari: { type: Type.NUMBER },
+        istisnalar: { type: Type.NUMBER },
+        indirimeEsasTutar: { type: Type.NUMBER },
+        digerIndirimler: { type: Type.NUMBER },
+        toplamIndirimler: { type: Type.NUMBER },
+        vergiMatrahi: { type: Type.NUMBER },
+        vergiOrani: { type: Type.NUMBER },
+        hesaplananKurumlarVergisi: { type: Type.NUMBER },
+        mahsupEdilecekVergiler: { type: Type.NUMBER },
+        odenmesiGerekenKV: { type: Type.NUMBER },
+        sonrakiYilaDevredenKV: { type: Type.NUMBER }
+    },
+    required: [
+        'ticariKar', 'kkegToplam', 'toplamIlaveler', 'karIlavelerToplami', 
+        'gecmisYilZararlari', 'istisnalar', 'toplamIndirimler', 'vergiMatrahi', 
+        'vergiOrani', 'hesaplananKurumlarVergisi', 'mahsupEdilecekVergiler', 'odenmesiGerekenKV'
+    ]
+};
+
 
 export const vatValuesSchema = {
     type: Type.OBJECT,

@@ -3,7 +3,12 @@ import { BilancoData, GelirGiderItem } from '../types';
 import { Card } from '../components/ui/Card';
 import { formatCurrency, formatPercent } from '../utils/formatters';
 
-const DikeyAnalizTable: React.FC<{ title: string; data: { ad: string; oncekiTutar: number; cariTutar: number }[]; toplam: { onceki: number; cari: number } }> = ({ title, data, toplam }) => (
+const DikeyAnalizTable: React.FC<{ 
+    title: string; 
+    data: { ad: string; cariTutar: number; oncekiTutar: number }[]; 
+    toplamCari: number;
+    toplamOnceki: number;
+}> = ({ title, data, toplamCari, toplamOnceki }) => (
     <Card>
         <h3 className="text-lg font-bold mb-4">{title}</h3>
         <div className="overflow-x-auto">
@@ -21,10 +26,10 @@ const DikeyAnalizTable: React.FC<{ title: string; data: { ad: string; oncekiTuta
                     {data.map((item, idx) => (
                         <tr key={idx} className="hover:bg-slate-700/50">
                             <td className="px-4 py-2">{item.ad}</td>
-                            <td className="px-4 py-2 text-right">{formatCurrency(item.oncekiTutar)}</td>
-                            <td className="px-4 py-2 text-right font-semibold text-cyan-400">{formatPercent((item.oncekiTutar / toplam.onceki) * 100)}</td>
-                            <td className="px-4 py-2 text-right">{formatCurrency(item.cariTutar)}</td>
-                            <td className="px-4 py-2 text-right font-semibold text-cyan-400">{formatPercent((item.cariTutar / toplam.cari) * 100)}</td>
+                            <td className="px-4 py-2 text-right font-mono">{formatCurrency(item.oncekiTutar)}</td>
+                            <td className="px-4 py-2 text-right font-semibold text-cyan-400">{formatPercent((item.oncekiTutar / toplamOnceki) * 100)}</td>
+                            <td className="px-4 py-2 text-right font-mono">{formatCurrency(item.cariTutar)}</td>
+                            <td className="px-4 py-2 text-right font-semibold text-cyan-400">{formatPercent((item.cariTutar / toplamCari) * 100)}</td>
                         </tr>
                     ))}
                 </tbody>
@@ -36,23 +41,22 @@ const DikeyAnalizTable: React.FC<{ title: string; data: { ad: string; oncekiTuta
 
 export const DikeyAnaliz: React.FC<{ bilancoData: BilancoData; gelirGiderData: GelirGiderItem[] }> = ({ bilancoData, gelirGiderData }) => {
     
-    // Simplified: Using first level items for analysis
-    const bilancoAnalizData = bilancoData.aktif[0].stoklar.map(s => ({
+    const bilancoAnalizData = bilancoData.aktif.flatMap(b => b.stoklar).map(s => ({
         ad: s.aciklama,
+        cariTutar: s.cariDonem,
         oncekiTutar: s.oncekiDonem,
-        cariTutar: s.cariDonem
     }));
     
-    const toplamAktifOnceki = bilancoData.aktif.reduce((sum, bolum) => sum + bolum.stoklar.reduce((s, stok) => s + stok.oncekiDonem, 0), 0);
     const toplamAktifCari = bilancoData.aktif.reduce((sum, bolum) => sum + bolum.stoklar.reduce((s, stok) => s + stok.cariDonem, 0), 0);
+    const toplamAktifOnceki = bilancoData.aktif.reduce((sum, bolum) => sum + bolum.stoklar.reduce((s, stok) => s + stok.oncekiDonem, 0), 0);
 
-    const gelirGiderAnalizData = gelirGiderData.slice(0, 5).map(item => ({
+    const gelirGiderAnalizData = gelirGiderData.map(item => ({
         ad: item.aciklama,
-        oncekiTutar: item.oncekiDonem,
-        cariTutar: item.cariDonem
+        cariTutar: item.cariDonem,
+        oncekiTutar: item.oncekiDonem
     }));
-    const brutSatislarOnceki = gelirGiderData.find(i => i.aciklama === 'Brüt Satışlar')?.oncekiDonem || 1;
-    const brutSatislarCari = gelirGiderData.find(i => i.aciklama === 'Brüt Satışlar')?.cariDonem || 1;
+    const brutSatislarCari = gelirGiderData.find(i => i.aciklama.toUpperCase().includes('BRÜT SATIŞLAR'))?.cariDonem || 1;
+    const brutSatislarOnceki = gelirGiderData.find(i => i.aciklama.toUpperCase().includes('BRÜT SATIŞLAR'))?.oncekiDonem || 1;
 
 
     return (
@@ -62,14 +66,16 @@ export const DikeyAnaliz: React.FC<{ bilancoData: BilancoData; gelirGiderData: G
             
             <div className="space-y-6">
                 <DikeyAnalizTable 
-                    title="Bilanço Dikey Analizi" 
+                    title="Bilanço Dikey Analizi (Aktifler)" 
                     data={bilancoAnalizData} 
-                    toplam={{ onceki: toplamAktifOnceki, cari: toplamAktifCari }} 
+                    toplamCari={toplamAktifCari} 
+                    toplamOnceki={toplamAktifOnceki} 
                 />
                 <DikeyAnalizTable 
                     title="Gelir Tablosu Dikey Analizi" 
                     data={gelirGiderAnalizData} 
-                    toplam={{ onceki: brutSatislarOnceki, cari: brutSatislarCari }} 
+                    toplamCari={brutSatislarCari} 
+                    toplamOnceki={brutSatislarOnceki} 
                 />
             </div>
         </div>

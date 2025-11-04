@@ -1,4 +1,4 @@
-import { AnalysisData, DetailedTaxReportItem, VergiselAnalizItem, MizanItem, BilancoData, GelirGiderItem, RasyoData, KurganAnaliz, NakitAkimData, KKEGItem } from '../types';
+import { AnalysisData, DetailedTaxReportItem, VergiselAnalizItem, MizanItem, BilancoData, GelirGiderItem, RasyoData, KurganAnaliz, NakitAkimData, KKEGItem, KurumlarVergisiHesaplama } from '../types';
 
 // Generic helper to call our backend API endpoints
 async function callApi<T>(endpoint: string, body: object): Promise<T> {
@@ -28,12 +28,14 @@ async function callApi<T>(endpoint: string, body: object): Promise<T> {
 
 // This is the new orchestrator function
 export const performFullAnalysis = async (
-    pdfText: string,
-    onProgress: (message: string) => void
+    dataSourceText: string,
+    onProgress: (message: string) => void,
+    initialMizan?: MizanItem[] // Optional pre-parsed mizan from Excel files
 ): Promise<AnalysisData> => {
     
+    // If mizan data is provided from a pre-parsed Excel, we skip the mizan analysis step
     const analysisSteps = [
-        { type: 'mizan', message: 'Mizan verileri analiz ediliyor...' },
+        ...(initialMizan ? [] : [{ type: 'mizan', message: 'Mizan verileri analiz ediliyor...' }]),
         { type: 'bilanco', message: 'Bilanço oluşturuluyor...' },
         { type: 'gelirGider', message: 'Gelir-Gider tablosu çıkarılıyor...' },
         { type: 'rasyolar', message: 'Finansal rasyolar hesaplanıyor...' },
@@ -41,13 +43,18 @@ export const performFullAnalysis = async (
         { type: 'kkeg', message: 'Kanunen Kabul Edilmeyen Giderler (KKEG) taranıyor...' },
         { type: 'kurganAnalizi', message: 'Sahte belge (Kurgan) risk analizi yapılıyor...' },
         { type: 'nakitAkim', message: 'Nakit akım tablosu hazırlanıyor...' },
+        { type: 'kurumlarVergisi', message: 'Kurumlar Vergisi hesaplanıyor...' },
     ];
     
     const results: any = {};
 
+    if (initialMizan) {
+        results.mizan = initialMizan;
+    }
+
     for (const step of analysisSteps) {
         onProgress(step.message);
-        results[step.type] = await callApi(`/api/analyze`, { pdfText, analysisType: step.type });
+        results[step.type] = await callApi(`/api/analyze`, { dataSourceText, analysisType: step.type });
     }
 
     onProgress("Raporlar birleştiriliyor...");
@@ -60,10 +67,11 @@ export const performFullAnalysis = async (
     const kkegAnalizData = results.kkeg as KKEGItem[];
     const kurganAnalizData = results.kurganAnalizi as KurganAnaliz;
     const nakitAkimData = results.nakitAkim as NakitAkimData;
+    const kurumlarVergisiData = results.kurumlarVergisi as KurumlarVergisiHesaplama;
     
     // Assemble the final JSON object
     const finalAnalysisData: AnalysisData = {
-        pdfText,
+        dataSourceText,
         dashboard: {
             summary: {
                 mizan: mizanData.length,
@@ -90,11 +98,12 @@ export const performFullAnalysis = async (
         gelirGiderAnalizi: gelirGiderData.slice(0, 8).map(item => ({
             name: item.aciklama.toUpperCase(),
             'Cari Dönem': Math.abs(item.cariDonem),
-            'Önceki Dönem': Math.abs(item.oncekiDonem)
+            'Önceki Dönem': Math.abs(item.oncekiDonem),
         })),
         kkegAnalizi: kkegAnalizData,
         kurganAnalizi: kurganAnalizData,
-        nakitAkim: nakitAkimData
+        nakitAkim: nakitAkimData,
+        kurumlarVergisi: kurumlarVergisiData,
     };
 
     onProgress("Analiz tamamlandı!");
@@ -103,8 +112,8 @@ export const performFullAnalysis = async (
 
 export const generateDetailedTaxReport = async (
     items: VergiselAnalizItem[],
-    pdfText: string
+    dataSourceText: string
 ): Promise<DetailedTaxReportItem[]> => {
-    const reportData = await callApi<DetailedTaxReportItem[]>('/api/generate-tax-report', { items, pdfText });
+    const reportData = await callApi<DetailedTaxReportItem[]>('/api/generate-tax-report', { items, dataSourceText });
     return reportData;
 };

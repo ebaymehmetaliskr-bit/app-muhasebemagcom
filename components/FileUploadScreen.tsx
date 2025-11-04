@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 interface FileUploadScreenProps {
-    onAnalyze: (file: File) => void;
+    onAnalyze: (file: File, fileType: 'pdf' | 'excel') => void;
     error: string | null;
 }
 
@@ -11,9 +11,17 @@ const PDFIcon = () => (
     </svg>
 );
 
+const ExcelIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+        <path d="M2 3a1 1 0 011-1h14a1 1 0 011 1v14a1 1 0 01-1 1H3a1 1 0 01-1-1V3zm2 2v2h12V5H4zm0 4v2h12V9H4zm0 4v2h12v-2H4z"/>
+    </svg>
+);
+
+
 export const FileUploadScreen: React.FC<FileUploadScreenProps> = ({ onAnalyze, error }) => {
     const [fileName, setFileName] = useState<string | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [fileType, setFileType] = useState<'pdf' | 'excel'>('pdf');
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files.length > 0) {
@@ -25,48 +33,79 @@ export const FileUploadScreen: React.FC<FileUploadScreenProps> = ({ onAnalyze, e
             setFileName(null);
         }
     };
+    
+    const resetFile = () => {
+        setSelectedFile(null);
+        setFileName(null);
+        const fileInput = document.getElementById('file-upload') as HTMLInputElement;
+        if(fileInput) fileInput.value = '';
+    }
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-slate-900">
-            <div className="w-full max-w-2xl text-center">
-                <h1 className="text-4xl font-bold text-white mb-2">AI Financial Analyst</h1>
-                <p className="text-lg text-gray-400 mb-8">Kurumlar Vergisi Beyannamesi PDF'lerini analiz edin.</p>
+            <div className="w-full max-w-3xl text-center">
+                <h1 className="text-4xl font-bold text-white mb-2">Finansal Analiz AI</h1>
+                <p className="text-lg text-gray-400 mb-8">Kurumlar Vergisi Beyannamesi veya Mizan dosyalarınızı analiz edin.</p>
                 
                 <div className="bg-slate-800 border border-slate-700 rounded-xl p-8 shadow-2xl">
-                    <div className="flex flex-col md:flex-row items-center justify-center gap-6">
-                        <label htmlFor="pdf-upload" className="cursor-pointer flex-1 w-full flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-600 rounded-lg hover:bg-slate-700 transition-colors">
-                            <PDFIcon />
-                            <span className="mt-2 text-sm font-medium text-gray-300">
-                                {fileName ? fileName : "PDF SEÇ"}
-                            </span>
-                            <input id="pdf-upload" name="pdf-upload" type="file" className="sr-only" accept=".pdf" onChange={handleFileChange} />
-                        </label>
-
-                        <div className="text-green-400 font-semibold text-lg p-3 bg-slate-700/50 rounded-lg">
-                           2024 YILI KURUMLAR...
-                        </div>
-
-                        <button
-                            onClick={() => selectedFile && onAnalyze(selectedFile)}
-                            disabled={!selectedFile}
-                            className="w-full md:w-auto flex-1 bg-green-600 text-white font-bold py-4 px-8 rounded-lg text-lg hover:bg-green-700 transition-all disabled:bg-slate-600 disabled:cursor-not-allowed"
+                    <div className="flex justify-center mb-6 border-b border-slate-700">
+                        <button 
+                            onClick={() => { setFileType('pdf'); resetFile(); }}
+                            className={`px-6 py-3 text-lg font-semibold border-b-4 transition-colors ${fileType === 'pdf' ? 'text-blue-400 border-blue-400' : 'text-gray-500 border-transparent hover:text-gray-300'}`}
                         >
-                            ✓ ANALİZ
+                            PDF Beyanname
+                        </button>
+                        <button 
+                            onClick={() => { setFileType('excel'); resetFile(); }}
+                            className={`px-6 py-3 text-lg font-semibold border-b-4 transition-colors ${fileType === 'excel' ? 'text-green-400 border-green-400' : 'text-gray-500 border-transparent hover:text-gray-300'}`}
+                        >
+                            Excel Mizan
                         </button>
                     </div>
 
-                    {error && <p className="mt-4 text-red-500">{error}</p>}
+                    <div className="flex flex-col md:flex-row items-center justify-center gap-6">
+                        <label htmlFor="file-upload" className="cursor-pointer flex-1 w-full flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-600 rounded-lg hover:bg-slate-700 transition-colors">
+                            {fileType === 'pdf' ? <PDFIcon /> : <ExcelIcon />}
+                            <span className="mt-2 text-sm font-medium text-gray-300">
+                                {fileName ? fileName : `BİR ${fileType.toUpperCase()} DOSYASI SEÇİN`}
+                            </span>
+                            <input id="file-upload" name="file-upload" type="file" className="sr-only" accept={fileType === 'pdf' ? '.pdf' : '.xlsx, .xls, .csv'} onChange={handleFileChange} />
+                        </label>
 
-                    <div className="mt-8 text-gray-500 text-sm">
-                        <p>Hızlı Analizler</p>
-                        <div className="mt-4 grid grid-cols-3 md:grid-cols-6 gap-4">
-                            {['Likidite Oranları', 'Finansal Yapı', 'Dikey Analiz', 'Yatay Analiz', 'Vergisel Analiz', 'Devir Hızları'].map(item => (
-                                <div key={item} className="p-3 bg-slate-700/50 rounded-lg text-center">
-                                    <p className="font-semibold text-gray-300 text-xs">{item}</p>
-                                    <p className="text-gray-400 text-[10px] leading-tight mt-1">{item} analizi</p>
-                                </div>
-                            ))}
-                        </div>
+                        <button
+                            onClick={() => selectedFile && onAnalyze(selectedFile, fileType)}
+                            disabled={!selectedFile}
+                            className="w-full md:w-auto flex-1 bg-blue-600 text-white font-bold py-4 px-8 rounded-lg text-lg hover:bg-blue-700 transition-all disabled:bg-slate-600 disabled:cursor-not-allowed"
+                        >
+                            ✓ ANALİZ ET
+                        </button>
+                    </div>
+
+                    {error && <p className="mt-6 text-red-500">{error}</p>}
+                    
+                    <div className="mt-8 text-left text-xs text-gray-500 p-4 bg-slate-900/50 rounded-lg">
+                        {fileType === 'excel' ? (
+                            <>
+                                <h4 className="font-bold text-gray-400 mb-2">Excel Mizan Formatı:</h4>
+                                <p>Lütfen Excel dosyanızın ilk sayfasının aşağıdaki sütunları içerdiğinden emin olun (başlıklar dahil):</p>
+                                <ul className="list-disc list-inside mt-2 text-gray-400">
+                                    <li><span className="font-mono bg-slate-700 px-1 rounded">Hesap Numarası</span></li>
+                                    <li><span className="font-mono bg-slate-700 px-1 rounded">Hesap Adı</span></li>
+                                    <li><span className="font-mono bg-slate-700 px-1 rounded">Kümüle Bakiye</span> (tek dönem analiz için)</li>
+                                </ul>
+                                <p className="mt-2">VEYA karşılaştırmalı analiz (Yatay Analiz) için:</p>
+                                 <ul className="list-disc list-inside mt-2 text-gray-400">
+                                    <li><span className="font-mono bg-slate-700 px-1 rounded">Hesap Numarası</span>, <span className="font-mono bg-slate-700 px-1 rounded">Hesap Adı</span></li>
+                                    <li><span className="font-mono bg-slate-700 px-1 rounded">Önceki Dönem Bakiye</span></li>
+                                    <li><span className="font-mono bg-slate-700 px-1 rounded">Cari Dönem Bakiye</span></li>
+                                </ul>
+                            </>
+                        ) : (
+                             <>
+                                <h4 className="font-bold text-gray-400 mb-2">PDF Beyanname Formatı:</h4>
+                                <p>Lütfen Gelir İdaresi Başkanlığı (GİB) sisteminden indirilmiş standart Kurumlar Vergisi Beyannamesi PDF'ini yüklediğinizden emin olun. Metin tabanlı PDF'ler en iyi sonuçları verir.</p>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>

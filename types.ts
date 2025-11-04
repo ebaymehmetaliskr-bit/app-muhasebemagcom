@@ -12,6 +12,7 @@ export type Page =
   | 'Kârlılık Oranları'
   | 'Dikey Analiz'
   | 'Yatay Analiz'
+  | 'Kurumlar Vergisi'
   | 'Vergisel Analiz'
   | 'KKEG Analizi'
   | 'Kurgan Analizi';
@@ -69,8 +70,8 @@ export interface GelirGiderItem {
 
 export interface RasyoItem {
     name: string;
-    cariDonem: number;
     oncekiDonem: number;
+    cariDonem: number;
     formula: string;
     yorum: string;
 }
@@ -160,6 +161,27 @@ export interface NakitAkimData {
     donemSonu: { aciklama: string; tutar: number };
 }
 
+export interface KurumlarVergisiHesaplama {
+    ticariKar: number;
+    kkegToplam: number;
+    zararIfaGideri: number;
+    digerIlaveler: number;
+    toplamIlaveler: number;
+    karIlavelerToplami: number;
+    gecmisYilZararlari: number;
+    istisnalar: number;
+    indirimeEsasTutar: number;
+    digerIndirimler: number;
+    toplamIndirimler: number;
+    vergiMatrahi: number;
+    vergiOrani: number;
+    hesaplananKurumlarVergisi: number;
+    mahsupEdilecekVergiler: number;
+    odenmesiGerekenKV: number;
+    sonrakiYilaDevredenKV: number;
+}
+
+
 export interface AnalysisData {
     dashboard: {
         summary: DashboardSummary;
@@ -175,5 +197,6 @@ export interface AnalysisData {
     kkegAnalizi: KKEGItem[];
     kurganAnalizi: KurganAnaliz;
     nakitAkim: NakitAkimData;
-    pdfText?: string;
+    kurumlarVergisi: KurumlarVergisiHesaplama;
+    dataSourceText?: string;
 }

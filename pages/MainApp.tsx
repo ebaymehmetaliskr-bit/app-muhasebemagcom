@@ -10,7 +10,7 @@ import { YatayAnaliz } from './YatayAnaliz';
 import { VergiselAnaliz } from './VergiselAnaliz';
 import { FileUploadScreen } from '../components/FileUploadScreen';
 import { performFullAnalysis } from '../services/geminiService';
-import { AnalysisData, Page } from '../types';
+import { AnalysisData, MizanItem, Page } from '../types';
 import { Loader } from '../components/ui/Loader';
 import { KurganAnalizi } from './KurganAnalizi';
 import { ProgressLoader } from '../components/ui/ProgressLoader';
@@ -20,6 +20,9 @@ import { FinansalYapiOranlari } from './FinansalYapiOranlari';
 import { LikiditeOranlari } from './LikiditeOranlari';
 import { DevirHizlari } from './DevirHizlari';
 import { KarlilikOranlari } from './KarlilikOranlari';
+import { KurumlarVergisi } from './KurumlarVergisi';
+import { processExcelFile } from '../utils/excelParser';
+
 
 async function extractTextFromPdf(file: File, onProgress: (progress: number) => void): Promise<string> {
     const pdfjsLib = (window as any).pdfjsLib;
@@ -50,38 +53,42 @@ export const MainApp: React.FC = () => {
     const [analysisStep, setAnalysisStep] = useState<string>('');
     const [highlightedAccountCode, setHighlightedAccountCode] = useState<string | null>(null);
 
-    const handleAnalysis = useCallback(async (file: File) => {
+    const handleAnalysis = useCallback(async (file: File, fileType: 'pdf' | 'excel') => {
         setIsLoading(true);
         setError(null);
-        setParsingProgress(0);
         setAnalysisStep('');
-        let pdfText;
-        try {
-            pdfText = await extractTextFromPdf(file, (progress) => {
-                setParsingProgress(progress);
-            });
-        } catch (err) {
-            console.error("PDF Parsing Error:", err);
-            setError('Analiz sırasında bir hata oluştu. PDF dosyası okunamıyor veya hasarlı olabilir.');
-            setIsLoading(false);
-            setParsingProgress(0);
-            return;
-        }
-        
-        setParsingProgress(0);
-        setAnalysisStep("Analiz başlatılıyor...");
-
 
         try {
-            if (!pdfText || pdfText.trim().length < 100) {
-                 throw new Error("PDF'ten yeterli metin çıkarılamadı. Dosyanın metin tabanlı olduğundan emin olun.");
+            let dataSourceText: string;
+            let initialMizan: MizanItem[] | undefined = undefined;
+
+            if (fileType === 'pdf') {
+                setAnalysisStep("PDF dosyası okunuyor...");
+                setParsingProgress(0);
+                dataSourceText = await extractTextFromPdf(file, setParsingProgress);
+            } else { // Excel flow
+                setAnalysisStep("Excel dosyası işleniyor...");
+                setParsingProgress(50);
+                initialMizan = await processExcelFile(file);
+                // For subsequent AI steps, use the clean, stringified mizan data
+                dataSourceText = JSON.stringify(initialMizan, null, 2); 
+                setParsingProgress(100);
             }
-            const data = await performFullAnalysis(pdfText, setAnalysisStep);
+            
+            if (!dataSourceText || dataSourceText.trim().length < 10) {
+                 throw new Error("Dosyadan yeterli veri çıkarılamadı. Dosyanın içeriğini ve formatını kontrol edin.");
+            }
+            
+            setParsingProgress(0);
+            setAnalysisStep("Analiz başlatılıyor...");
+            
+            const data = await performFullAnalysis(dataSourceText, setAnalysisStep, initialMizan);
             setAnalysisData(data);
             setCurrentPage('Dashboard');
+
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Analiz sırasında bilinmeyen bir hata oluştu.');
-            console.error("Analysis Service Error:", err);
+            console.error("Analysis or Parsing Error:", err);
         } finally {
             setIsLoading(false);
         }
@@ -125,10 +132,12 @@ export const MainApp: React.FC = () => {
                 return <DikeyAnaliz bilancoData={analysisData.bilanco} gelirGiderData={analysisData.gelirGider} />;
             case 'Yatay Analiz':
                 return <YatayAnaliz bilancoData={analysisData.bilanco} gelirGiderData={analysisData.gelirGider} />;
+            case 'Kurumlar Vergisi':
+                return <KurumlarVergisi data={analysisData.kurumlarVergisi} />;
             case 'Vergisel Analiz':
                 return <VergiselAnaliz 
                     data={analysisData.vergiselAnaliz} 
-                    pdfText={analysisData.pdfText || ''} 
+                    dataSourceText={analysisData.dataSourceText || ''} 
                     mizanData={analysisData.mizan}
                     onHighlightAccount={handleHighlightAccount}
                 />;
@@ -148,7 +157,7 @@ export const MainApp: React.FC = () => {
 
     if (isLoading) {
         if (parsingProgress > 0) {
-            return <ProgressLoader progress={parsingProgress} message="PDF dosyası okunuyor ve metin çıkarılıyor..." />;
+            return <ProgressLoader progress={parsingProgress} message={analysisStep || "Dosya işleniyor..."} />;
         }
         return <Loader message={analysisStep || "Analiz hazırlanıyor..."} />;
     }

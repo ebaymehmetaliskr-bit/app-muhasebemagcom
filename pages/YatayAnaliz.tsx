@@ -1,76 +1,179 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { BilancoData, GelirGiderItem } from '../types';
 import { Card } from '../components/ui/Card';
-import { ArrowUpIcon, ArrowDownIcon } from '../components/ui/Icons';
-import { formatCurrency } from '../utils/formatters';
+import { formatCurrency, formatPercent } from '../utils/formatters';
+import { DownloadIcon } from '../components/ui/Icons';
+import { exportToCsv } from '../utils/exportUtils';
+import { SimpleBarChart } from '../components/charts/Charts';
 
-const YatayAnalizTable: React.FC<{ title: string; data: { ad: string; onceki: number; cari: number }[] }> = ({ title, data }) => (
-    <Card>
-        <h3 className="text-lg font-bold mb-4">{title}</h3>
-        <p className="text-xs text-gray-500 mb-4">Dönemler arası değişim: (Cari Dönem - Önceki Dönem) / Önceki Dönem x 100</p>
-        <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-                <thead className="text-xs text-gray-400 uppercase bg-slate-800">
-                    <tr>
-                        <th scope="col" className="px-6 py-4 text-left font-medium">Hesap Adı</th>
-                        <th scope="col" className="px-6 py-4 text-right font-medium">Önceki Dönem</th>
-                        <th scope="col" className="px-6 py-4 text-right font-medium">Cari Dönem</th>
-                        <th scope="col" className="px-6 py-4 text-right font-medium">Değişim Tutarı</th>
-                        <th scope="col" className="px-6 py-4 text-right font-medium">Artış/Azalış %</th>
-                    </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-700">
-                    {data.map((item, idx) => {
-                        const degisim = item.cari - item.onceki;
-                        const yuzde = item.onceki !== 0 ? (degisim / Math.abs(item.onceki)) * 100 : (item.cari > 0 ? Infinity : 0);
-                        const isPositive = degisim > 0;
+interface YatayAnalizProps {
+    bilancoData: BilancoData;
+    gelirGiderData: GelirGiderItem[];
+}
 
-                        return (
-                            <tr key={idx} className="hover:bg-slate-700/50 transition-colors duration-150">
-                                <td className="px-6 py-3 font-medium text-white">{item.ad}</td>
-                                <td className="px-6 py-3 text-right font-mono">{formatCurrency(item.onceki)}</td>
-                                <td className="px-6 py-3 text-right font-mono">{formatCurrency(item.cari)}</td>
-                                <td className={`px-6 py-3 text-right font-mono font-semibold ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
-                                    {formatCurrency(degisim)}
-                                </td>
-                                <td className="px-6 py-3 text-right">
-                                    <div className={`flex items-center justify-end font-bold text-sm ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
-                                        {isPositive ? <ArrowUpIcon /> : <ArrowDownIcon />}
-                                        <span className="ml-1 font-mono">{isFinite(yuzde) ? yuzde.toFixed(2) : '---'}</span>
-                                    </div>
-                                </td>
-                            </tr>
-                        );
-                    })}
-                </tbody>
-            </table>
-        </div>
-    </Card>
-);
+interface TableRow {
+    aciklama: string;
+    oncekiDonem: number;
+    cariDonem: number;
+    isMain?: boolean;
+    isSub?: boolean;
+}
 
-export const YatayAnaliz: React.FC<{ bilancoData: BilancoData; gelirGiderData: GelirGiderItem[] }> = ({ bilancoData, gelirGiderData }) => {
+const getSignificantChanges = (items: { aciklama: string; oncekiDonem: number; cariDonem: number }[], count: number = 8) => {
+    const changes = items
+        .map(item => ({
+            name: item.aciklama.replace(/^(\.\.\s*)/, ''),
+            'Fark (Tutar)': item.cariDonem - item.oncekiDonem,
+        }))
+        .filter(item => 
+            item['Fark (Tutar)'] !== 0 && 
+            !item.name.toLowerCase().includes('toplam') &&
+            !item.name.toLowerCase().includes('varlıklar') &&
+            !item.name.toLowerCase().includes('kaynaklar') &&
+            !/^[A-Z]\.\s/.test(item.name) && // Filter out headings like 'A. Hazır Değerler'
+            !/^[IVX]+\.\s/.test(item.name) // Filter out headings like 'I. Dönen Varlıklar'
+        );
+
+    changes.sort((a, b) => Math.abs(b['Fark (Tutar)']) - Math.abs(a['Fark (Tutar)']));
     
-    const bilancoAnalizData = bilancoData.aktif[0].stoklar.map(s => ({
-        ad: s.aciklama,
-        onceki: s.oncekiDonem,
-        cari: s.cariDonem
-    }));
+    // Reverse for vertical bar chart to show largest at top
+    return changes.slice(0, count).reverse();
+};
 
-    const gelirGiderAnalizData = gelirGiderData.slice(0, 5).map(item => ({
-        ad: item.aciklama,
-        onceki: item.oncekiDonem,
-        cari: item.cariDonem
-    }));
+const YatayAnalizTable: React.FC<{ title: string; data: TableRow[] }> = ({ title, data }) => {
     
+    const hasPrevPeriodData = data.some(item => item.oncekiDonem !== 0);
+
+    if (!hasPrevPeriodData) {
+        return (
+            <Card>
+                 <h3 className="text-lg font-bold mb-4">{title}</h3>
+                 <p className="text-gray-400">Yatay analiz için karşılaştırılacak bir önceki dönem verisi bulunamadı.</p>
+            </Card>
+        )
+    }
+
     return (
-        <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-white">Yatay Analiz</h2>
-            <p className="text-gray-400 -mt-4">Dönemler arası değişim analizi</p>
-            
-            <div className="space-y-6">
-                <YatayAnalizTable title="Bilanço Yatay Analizi" data={bilancoAnalizData} />
-                <YatayAnalizTable title="Gelir Tablosu Yatay Analizi" data={gelirGiderAnalizData} />
+        <Card>
+            <h3 className="text-lg font-bold mb-4">{title}</h3>
+            <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                    <thead className="text-xs text-gray-400 uppercase bg-slate-700/50">
+                        <tr>
+                            <th className="px-4 py-2 text-left">Hesap Adı</th>
+                            <th className="px-4 py-2 text-right">Önceki Dönem</th>
+                            <th className="px-4 py-2 text-right">Cari Dönem</th>
+                            <th className="px-4 py-2 text-right">Fark (Tutar)</th>
+                            <th className="px-4 py-2 text-right">Fark (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-700">
+                        {data.map((item, idx) => {
+                            const farkTutar = item.cariDonem - item.oncekiDonem;
+                            const farkYuzde = item.oncekiDonem !== 0 ? (farkTutar / Math.abs(item.oncekiDonem)) * 100 : (item.cariDonem !== 0 ? Infinity : 0);
+                            
+                            const rowClass = item.isMain ? 'font-bold bg-slate-800/60' : item.isSub ? 'font-semibold' : '';
+
+                            return (
+                                <tr key={idx} className={`hover:bg-slate-700/50 ${rowClass}`}>
+                                    <td className="px-4 py-2">{item.aciklama}</td>
+                                    <td className="px-4 py-2 text-right font-mono">{formatCurrency(item.oncekiDonem)}</td>
+                                    <td className="px-4 py-2 text-right font-mono">{formatCurrency(item.cariDonem)}</td>
+                                    <td className="px-4 py-2 text-right font-mono">{formatCurrency(farkTutar)}</td>
+                                    <td className={`px-4 py-2 text-right font-mono font-semibold ${farkYuzde >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                        {isFinite(farkYuzde) ? formatPercent(farkYuzde) : 'N/A'}
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
             </div>
+        </Card>
+    );
+};
+
+export const YatayAnaliz: React.FC<YatayAnalizProps> = ({ bilancoData, gelirGiderData }) => {
+    
+    const bilancoFlatDataForTable = [
+        ...bilancoData.aktif.flatMap(b => [{aciklama: b.bolumAdi, oncekiDonem: 0, cariDonem: 0, isMain: true}, ...b.stoklar.map(s => ({...s, isSub: !s.aciklama.startsWith('..')}))]),
+        ...bilancoData.pasif.flatMap(b => [{aciklama: b.bolumAdi, oncekiDonem: 0, cariDonem: 0, isMain: true}, ...b.stoklar.map(s => ({...s, isSub: !s.aciklama.startsWith('..')}))])
+    ];
+
+    const bilancoFlatDataForChart = [
+        ...bilancoData.aktif.flatMap(b => b.stoklar),
+        ...bilancoData.pasif.flatMap(b => b.stoklar)
+    ];
+
+    const bilancoChartData = useMemo(() => getSignificantChanges(bilancoFlatDataForChart), [bilancoData]);
+    const gelirGiderChartData = useMemo(() => getSignificantChanges(gelirGiderData), [gelirGiderData]);
+
+    const handleExport = () => {
+        const dataToExport = [
+            { type: 'Bilanço', data: bilancoFlatDataForTable },
+            { type: 'Gelir Tablosu', data: gelirGiderData }
+        ].flatMap(table => 
+            table.data.map(item => {
+                const farkTutar = item.cariDonem - item.oncekiDonem;
+                const farkYuzde = item.oncekiDonem !== 0 ? (farkTutar / Math.abs(item.oncekiDonem)) * 100 : 0;
+                return {
+                    Tablo: table.type,
+                    Açıklama: item.aciklama,
+                    'Önceki Dönem': item.oncekiDonem,
+                    'Cari Dönem': item.cariDonem,
+                    'Fark (Tutar)': farkTutar,
+                    'Fark (%)': farkYuzde.toFixed(2),
+                };
+            })
+        );
+        
+        const headers = [
+            { key: 'Tablo', label: 'Tablo' },
+            { key: 'Açıklama', label: 'Açıklama' },
+            { key: 'Önceki Dönem', label: 'Önceki Dönem' },
+            { key: 'Cari Dönem', label: 'Cari Dönem' },
+            { key: 'Fark (Tutar)', label: 'Fark (Tutar)' },
+            { key: 'Fark (%)', label: 'Fark (%)' },
+        ];
+        exportToCsv('yatay_analiz', dataToExport, headers);
+    };
+
+    return (
+        <div className="space-y-8">
+             <div className="flex justify-between items-start">
+                <div>
+                    <h2 className="text-2xl font-bold text-white">Yatay Analiz (Karşılaştırmalı Tablolar)</h2>
+                    <p className="text-gray-400">Finansal tabloların birbirini izleyen iki dönem arasındaki değişimini inceleme.</p>
+                </div>
+                 <button
+                    onClick={handleExport}
+                    className="flex-shrink-0 flex items-center gap-2 px-3 py-2 text-sm font-semibold text-white bg-green-600 hover:bg-green-700 rounded-md transition-colors"
+                    title="Excel'e Aktar"
+                >
+                    <DownloadIcon className="w-4 h-4" />
+                    <span>Aktar</span>
+                </button>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card title="Bilanço - Öne Çıkan Değişimler">
+                    <SimpleBarChart 
+                        data={bilancoChartData}
+                        keys={['Fark (Tutar)']}
+                        layout="vertical"
+                    />
+                </Card>
+                <Card title="Gelir Tablosu - Öne Çıkan Değişimler">
+                     <SimpleBarChart 
+                        data={gelirGiderChartData}
+                        keys={['Fark (Tutar)']}
+                        layout="vertical"
+                    />
+                </Card>
+            </div>
+
+            <YatayAnalizTable title="Bilanço Yatay Analizi" data={bilancoFlatDataForTable} />
+            <YatayAnalizTable title="Gelir Tablosu Yatay Analizi" data={gelirGiderData} />
         </div>
     );
 };

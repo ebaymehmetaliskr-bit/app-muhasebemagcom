@@ -1,36 +1,11 @@
 import React from 'react';
 import { RasyoItem } from '../../types';
 import { Card } from './Card';
-import { ArrowUpIcon, ArrowDownIcon, InfoIcon } from './Icons';
+import { InfoIcon, ArrowUpIcon, ArrowDownIcon } from './Icons';
 
 interface RatioCardProps {
     ratio: RasyoItem;
 }
-
-const TrendIndicator: React.FC<{ cari: number, onceki: number }> = ({ cari, onceki }) => {
-    if (onceki === 0 && cari === 0) return null;
-    const change = cari - onceki;
-    const isPositive = change >= 0;
-
-    const percentageChange = onceki !== 0 
-        ? ((change / Math.abs(onceki)) * 100) 
-        : (cari !== 0 ? Infinity : 0);
-
-    const changeText = isFinite(percentageChange)
-        ? `${isPositive ? '+' : ''}${percentageChange.toFixed(1)}%`
-        : (isPositive ? '∞' : '-∞');
-
-    const changeColor = isPositive ? 'text-green-400' : 'text-red-400';
-    const changeBgColor = isPositive ? 'bg-green-500/10' : 'bg-red-500/10';
-
-    return (
-        <div className={`flex items-center px-2 py-1 rounded-md text-xs font-bold ${changeBgColor} ${changeColor}`}>
-            {isPositive ? <ArrowUpIcon /> : <ArrowDownIcon />}
-            <span className="ml-1">{changeText}</span>
-        </div>
-    );
-};
-
 
 export const RatioCard: React.FC<RatioCardProps> = ({ ratio }) => {
     
@@ -42,15 +17,36 @@ export const RatioCard: React.FC<RatioCardProps> = ({ ratio }) => {
         return value.toFixed(1);
     }
     
+    const { cariDonem, oncekiDonem } = ratio;
+    const change = cariDonem - oncekiDonem;
+    const percentageChange = oncekiDonem !== 0 ? (change / Math.abs(oncekiDonem)) * 100 : (cariDonem !== 0 ? Infinity : 0);
+    const isPositive = change >= 0;
+
+    const hasPrevPeriod = oncekiDonem !== 0 || cariDonem !== 0; // Basic check if there's any data to compare
+
+    const changeText = isFinite(percentageChange)
+        ? `${isPositive ? '+' : ''}${percentageChange.toFixed(1)}%`
+        : (isPositive ? '∞' : '-∞');
+
+    const changeColor = isPositive ? 'text-green-400' : 'text-red-400';
+    const changeBgColor = isPositive ? 'bg-green-500/10' : 'bg-red-500/10';
+
     return (
         <Card className="flex flex-col justify-between">
             <div>
                 <div className="flex justify-between items-start mb-1">
                     <h4 className="font-bold text-white pr-2">{ratio.name}</h4>
-                    <TrendIndicator cari={ratio.cariDonem} onceki={ratio.oncekiDonem} />
+                    {hasPrevPeriod && (
+                         <div className={`flex items-center px-2 py-1 rounded-md text-xs font-bold ${changeBgColor} ${changeColor}`}>
+                            {isPositive ? <ArrowUpIcon /> : <ArrowDownIcon />}
+                            <span className="ml-1">{changeText}</span>
+                        </div>
+                    )}
                 </div>
-                <p className="text-3xl font-bold text-white my-1">{formatValue(ratio.cariDonem)}</p>
-                <p className="text-xs text-gray-500">Önceki Dönem: {formatValue(ratio.oncekiDonem)}</p>
+                <p className="text-3xl font-bold text-white my-1">{formatValue(cariDonem)}</p>
+                <p className="text-xs text-gray-500">
+                    Önceki Dönem: {formatValue(oncekiDonem)}
+                </p>
             </div>
             <div className="mt-4 pt-4 border-t border-slate-700 space-y-3">
                 <div className="text-xs">

@@ -8,7 +8,8 @@ import {
     vergiselAnalizSchema, 
     kurganAnalizSchema, 
     nakitAkimSchema,
-    kkegAnalizSchema
+    kkegAnalizSchema,
+    kurumlarVergisiSchema
 } from './_schemas.js';
 
 // Helper function to make individual requests to the Gemini API
@@ -36,10 +37,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     try {
-        const { pdfText, analysisType } = req.body;
+        const { dataSourceText, analysisType } = req.body;
 
-        if (!pdfText || typeof pdfText !== 'string' || pdfText.trim().length < 100) {
-            return res.status(400).json({ message: "Invalid or insufficient 'pdfText' provided." });
+        if (!dataSourceText || typeof dataSourceText !== 'string' || dataSourceText.trim().length < 10) {
+            return res.status(400).json({ message: "Invalid or insufficient 'dataSourceText' provided." });
         }
         if (!analysisType || typeof analysisType !== 'string') {
             return res.status(400).json({ message: "An 'analysisType' must be provided." });
@@ -54,59 +55,90 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         let prompt;
         let schema;
 
+        // Base instruction for all prompts
+        const baseInstruction = `You are an expert Turkish accountant and financial analyst. The following data is either unstructured text from a tax document or a JSON string from a trial balance (Mizan). Your task is to analyze it and generate a valid JSON output based on the specific analysis type requested.`;
+
         switch (analysisType) {
             case 'mizan':
-                prompt = `Analyze the provided text from a Turkish Corporate Tax Return PDF. Extract the Mizan (Trial Balance) for current and previous periods. Identify main (isMain: true) and sub-account (isSub: true) groups. The output MUST be a single, valid JSON object that strictly adheres to the provided schema. --- ${pdfText} ---`;
+                prompt = `${baseInstruction}
+                Analysis Type: Mizan (Trial Balance)
+                Task: Analyze the provided data, which may be unstructured text or a JSON array from an Excel file. Extract the Trial Balance for both the previous period ('oncekiDonem') and current period ('cariDonem'). Identify main account groups (isMain: true) and sub-groups (isSub: true). If the source data only contains a single period or a cumulative balance ('Kümüle Bakiye' or similar), map this value to 'cariDonem' and set 'oncekiDonem' to 0. The output MUST be a valid JSON array of objects strictly adhering to the schema.
+                --- DATA ---
+                ${dataSourceText}
+                --- END DATA ---`;
                 schema = mizanSchema;
                 break;
             case 'bilanco':
-                prompt = `Analyze the provided text from a Turkish Corporate Tax Return PDF. Extract the Bilanço (Balance Sheet). Structure assets (Aktif) and liabilities (Pasif) into their respective sections and stock items. The output MUST be a single, valid JSON object that strictly adheres to the provided schema. --- ${pdfText} ---`;
+                prompt = `${baseInstruction}
+                Analysis Type: Bilanço (Balance Sheet)
+                Task: Using the provided financial data, construct a Balance Sheet for both 'oncekiDonem' and 'cariDonem'. Structure assets (Aktif) and liabilities/equity (Pasif) into their respective sections and items. If only one period is available, use it for 'cariDonem' and set 'oncekiDonem' to 0. The output MUST be a single, valid JSON object strictly adhering to the schema.
+                --- DATA ---
+                ${dataSourceText}
+                --- END DATA ---`;
                 schema = bilancoSchema;
                 break;
             case 'gelirGider':
-                prompt = `Analyze the provided text from a Turkish Corporate Tax Return PDF. Extract the Gelir Tablosu (Income Statement) data. The output MUST be a single, valid JSON array of objects that strictly adheres to the provided schema. --- ${pdfText} ---`;
+                prompt = `${baseInstruction}
+                Analysis Type: Gelir Tablosu (Income Statement)
+                Task: Using the provided financial data, construct an Income Statement for both 'oncekiDonem' and 'cariDonem'. If only one period is available, use it for 'cariDonem' and set 'oncekiDonem' to 0. The output MUST be a valid JSON array of objects strictly adhering to the schema.
+                --- DATA ---
+                ${dataSourceText}
+                --- END DATA ---`;
                 schema = gelirGiderSchema;
                 break;
             case 'rasyolar':
-                 prompt = `Provided is the text from a Turkish Corporate Tax Return PDF. Your task is to perform a comprehensive ratio analysis. Calculate the following financial ratios for both the current ('cariDonem') and previous ('oncekiDonem') periods. Group them into four categories: 'finansalYapi', 'likidite', 'devirHizlari', and 'karlilik'.
-
-For each ratio, you MUST provide:
-1.  'name': The Turkish name of the ratio.
-2.  'cariDonem': The calculated value for the current period.
-3.  'oncekiDonem': The calculated value for the previous period.
-4.  'formula': The mathematical formula used for the calculation in Turkish.
-5.  'yorum': A brief, insightful interpretation of the ratio's value and trend, including generally accepted standards where applicable (e.g., "Cari Oran için 1.5-2.0 arası ideal kabul edilir.").
-
-For each of the four groups, you MUST also provide an 'ozet':
-- 'ozet': A concise, 2-3 sentence summary of the company's situation based on the ratios in that specific group. For example, for 'finansalYapi', summarize the overall debt structure and financial risk.
-
-**Ratio List:**
-- **likidite:** Cari Oran, Asit-Test Oranı, Nakit Oranı.
-- **finansalYapi:** Kaldıraç Oranı, Öz Kaynak Oranı, Borç / Öz Kaynak Oranı, Duran Varlıkların Devamlı Sermayeye Oranı, Kısa Vadeli Yabancı Kaynak Oranı, Uzun Vadeli Yabancı Kaynak Oranı, Duran Varlıkların Özkaynaklara Oranı.
-- **devirHizlari:** Stok Devir Hızı, Stokta Kalma Süresi (Gün), Alacak Devir Hızı, Ortalama Tahsil Süresi (Gün), Aktif Devir Hızı.
-- **karlilik:** Brüt Kâr Marjı, Net Kâr Marjı, Öz Kaynak Kârlılığı (ROE), Varlıkların Kârlılığı (ROA).
-
-The output MUST be a single, valid JSON object that strictly adheres to the provided schema. Do not include any explanations outside the JSON.
----
-${pdfText}
----`;
+                 prompt = `${baseInstruction}
+                 Analysis Type: Financial Ratios
+                 Task: Perform a comprehensive ratio analysis. Calculate ratios for both 'oncekiDonem' and 'cariDonem'. If only one period's data is available, calculate for 'cariDonem' and set 'oncekiDonem' to 0. Group ratios into 'finansalYapi', 'likidite', 'devirHizlari', and 'karlilik'. For each ratio, provide 'name', 'oncekiDonem' value, 'cariDonem' value, 'formula', and a brief 'yorum' (interpretation). For each group, provide a 2-3 sentence 'ozet' (summary). The output must be a single, valid JSON object strictly adhering to the schema.
+                 --- DATA ---
+                 ${dataSourceText}
+                 --- END DATA ---`;
                  schema = ratiosSchema;
                 break;
             case 'vergiselAnaliz':
-                 prompt = `Based on the financial text, identify at least 20 potential tax risks or compliance checks according to Turkish tax law. Adhere to the schema. --- ${pdfText} ---`;
+                 prompt = `${baseInstruction}
+                 Analysis Type: Tax Risk Analysis
+                 Task: Based on the financial data, identify at least 20 potential tax risks or compliance checks according to Turkish tax law. For each, determine its 'durum' ('Evet' for compliant, 'Hayır' for risk). The output must be a valid JSON array strictly adhering to the schema.
+                 --- DATA ---
+                 ${dataSourceText}
+                 --- END DATA ---`;
                  schema = vergiselAnalizSchema;
                 break;
             case 'kkeg':
-                prompt = `Analyze the provided financial text from a Turkish Corporate Tax Return. Identify and extract all items that are considered "Kanunen Kabul Edilmeyen Giderler" (KKEG) - Non-Deductible Expenses. This includes items like tax penalties, undocumented expenses, excess depreciation, motor vehicle tax for passenger cars, etc. For each item, provide a detailed description, the amount, a justification, the relevant legal basis (e.g., KVK Madde 11/1-d), and the associated account codes. The output must be a valid JSON array adhering strictly to the provided schema. --- ${pdfText} ---`;
+                prompt = `${baseInstruction}
+                Analysis Type: KKEG (Non-Deductible Expenses)
+                Task: Identify all "Kanunen Kabul Edilmeyen Giderler" (KKEG) from the current period data. For each, provide a description, amount ('tutar'), justification, legal basis, and associated account codes. The output must be a valid JSON array adhering strictly to the schema.
+                --- DATA ---
+                ${dataSourceText}
+                --- END DATA ---`;
                 schema = kkegAnalizSchema;
                 break;
             case 'kurganAnalizi':
-                prompt = `Based on the financial text, perform a fraud risk assessment for fraudulent documents (Sahte Belge) using the VDK KURGAN methodology. Adhere to the schema. --- ${pdfText} ---`;
+                prompt = `${baseInstruction}
+                Analysis Type: Kurgan (Fraudulent Document Risk)
+                Task: Perform a fraud risk assessment for fraudulent documents (Sahte Belge) using the VDK KURGAN methodology based on the current period data. Provide an overall risk level, summary, criteria-based analysis, and action recommendations. The output must be a valid JSON object adhering strictly to the schema.
+                --- DATA ---
+                ${dataSourceText}
+                --- END DATA ---`;
                 schema = kurganAnalizSchema;
                 break;
             case 'nakitAkim':
-                prompt = `Based on the financial text, generate a cash flow statement using the indirect method. Adhere to the schema. --- ${pdfText} ---`;
+                prompt = `${baseInstruction}
+                Analysis Type: Nakit Akım (Cash Flow Statement)
+                Task: Generate a cash flow statement using the indirect method, based on the changes between the two available periods. The output must be a valid JSON object adhering strictly to the schema.
+                --- DATA ---
+                ${dataSourceText}
+                --- END DATA ---`;
                 schema = nakitAkimSchema;
+                break;
+             case 'kurumlarVergisi':
+                prompt = `${baseInstruction}
+                Analysis Type: Kurumlar Vergisi Hesaplaması (Corporate Tax Calculation)
+                Task: Based on the provided financial data (likely a trial balance for the current period), calculate the corporate tax. Follow the standard Turkish tax calculation format: start with 'ticariKar', add 'kkegToplam' and other additions, subtract deductions and exemptions to find 'vergiMatrahi', apply the 'vergiOrani' (use 25% if not specified) to get 'hesaplananKurumlarVergisi', and finally determine 'odenmesiGerekenKV'. The output MUST be a single, valid JSON object adhering strictly to the schema.
+                --- DATA ---
+                ${dataSourceText}
+                --- END DATA ---`;
+                schema = kurumlarVergisiSchema;
                 break;
             default:
                 return res.status(400).json({ message: "Invalid 'analysisType' provided." });

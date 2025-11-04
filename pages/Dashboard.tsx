@@ -85,13 +85,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ data }) => {
                     </div>
                 </Card>
                 <Card title="Gelir-Gider Analizi">
-                     <SimpleBarChart data={gelirGiderAnalizi} keys={['Cari Dönem']} />
+                     <SimpleBarChart data={gelirGiderAnalizi} keys={['Önceki Dönem', 'Cari Dönem']} />
                 </Card>
             </div>
             
             <Card title="Kârlılık Trend Analizi">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {/* Fix: `karlilik` is an object of type `RasyoGrup`. The array to iterate over is `karlilik.ratios`. Also, property access for dönem values should be camelCase. */}
                     {karlilik.ratios.map(item => (
                         <ProfitabilityTrendCard
                             key={item.name}

@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid, Brush } from 'recharts';
 import { PieChartData, BarChartData } from '../../types';
 
 const PIE_COLORS = ['#3b82f6', '#10b981', '#f97316', '#8b5cf6', '#ec4899'];
-const BAR_COLORS = ['#10b981', '#f97316'];
+const BAR_COLORS = ['#10b981', '#ef4444']; // Green for positive, Red for negative
 
 const formatValueForTooltip = (value: any) => {
     if (typeof value !== 'number') return value;
@@ -105,6 +104,8 @@ export const SimpleBarChart: React.FC<SimpleBarChartProps> = ({ data, keys, layo
         return tickItem.toString();
     };
 
+    const hasDynamicColoring = keys.length === 1;
+
     return (
         <ResponsiveContainer width="100%" height={300}>
             <BarChart 
@@ -135,7 +136,11 @@ export const SimpleBarChart: React.FC<SimpleBarChartProps> = ({ data, keys, layo
                 />
                 <Legend iconSize={10} />
                 {keys.map((key, index) => (
-                    <Bar key={key} dataKey={key} fill={BAR_COLORS[index % BAR_COLORS.length]} />
+                    <Bar key={key} dataKey={key} fill={BAR_COLORS[index % BAR_COLORS.length]}>
+                         {hasDynamicColoring && data.map((entry, idx) => (
+                             <Cell key={`cell-${idx}`} fill={entry[key] < 0 ? BAR_COLORS[1] : BAR_COLORS[0]} />
+                        ))}
+                    </Bar>
                 ))}
                 
                 {layout === 'horizontal' && data.length > 5 && (

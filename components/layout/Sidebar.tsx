@@ -4,7 +4,8 @@ import React from 'react';
 import { Page } from '../../types';
 import { 
     DashboardIcon, MizanIcon, BilancoIcon, GelirGiderIcon, RasyoIcon, 
-    DikeyAnalizIcon, YatayAnalizIcon, VergiselAnalizIcon, DevirHizlariIcon, KurganAnaliziIcon, NakitAkimIcon, KKEGIcon 
+    DikeyAnalizIcon, YatayAnalizIcon, VergiselAnalizIcon, DevirHizlariIcon, 
+    KurganAnaliziIcon, NakitAkimIcon, KKEGIcon, CalculatorIcon 
 } from '../ui/Icons';
 
 interface SidebarProps {
@@ -18,6 +19,7 @@ const sidebarItems: { name: Page; icon: React.FC<any> }[] = [
   { name: 'Bilanço', icon: BilancoIcon },
   { name: 'Gelir ve Gider', icon: GelirGiderIcon },
   { name: 'Nakit Akım', icon: NakitAkimIcon },
+  { name: 'Kurumlar Vergisi', icon: CalculatorIcon },
   { name: 'Finansal Yapı Oranları', icon: RasyoIcon },
   { name: 'Likidite Oranları', icon: RasyoIcon },
   { name: 'Devir Hızları', icon: DevirHizlariIcon },
