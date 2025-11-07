@@ -1,31 +1,77 @@
 import { AnalysisData, DetailedTaxReportItem, VergiselAnalizItem, MizanItem, BilancoData, GelirGiderItem, RasyoData, KurganAnaliz, NakitAkimData, KKEGItem, KurumlarVergisiHesaplama } from '../types';
 
-// Generic helper to call our backend API endpoints
-async function callApi<T>(endpoint: string, body: object): Promise<T> {
-    try {
-        const response = await fetch(endpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(body),
-        });
+// Constants for the retry mechanism
+const MAX_RETRIES = 5;
+const INITIAL_BACKOFF_MS = 2000; // Start with a 2-second delay
 
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({ message: response.statusText, error: '' }));
-            // Backend returns { message, error }, let's combine them for a better client-side error.
-            const detailedError = errorData.error ? `${errorData.message} - Detay: ${errorData.error}` : errorData.message;
-            throw new Error(detailedError || `Sunucu hatası: ${response.status}`);
+// Generic helper to call our backend API endpoints with a robust retry mechanism
+async function callApi<T>(
+    endpoint: string, 
+    body: object, 
+    onProgress?: (message: string) => void
+): Promise<T> {
+    let lastError: Error | null = null;
+
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+        try {
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(body),
+            });
+
+            // If the request was successful, return the JSON data.
+            if (response.ok) {
+                return await response.json() as T;
+            }
+
+            // For specific transient errors (like 503 Service Unavailable or 429 Too Many Requests),
+            // we prepare to retry instead of failing immediately.
+            if (response.status === 503 || response.status === 429) {
+                const errorData = await response.json().catch(() => ({ message: response.statusText }));
+                const errorMessage = `Sunucu geçici olarak meşgul (Hata ${response.status}).`;
+                 console.warn(`Attempt ${attempt + 1} failed: ${errorMessage}`, errorData);
+                lastError = new Error(errorMessage);
+                // Continue to the retry logic below
+            } else {
+                // For other client/server errors (e.g., 400, 500), fail fast.
+                const errorData = await response.json().catch(() => ({ message: response.statusText, error: '' }));
+                const detailedError = errorData.error ? `${errorData.message} - Detay: ${errorData.error}` : errorData.message;
+                throw new Error(detailedError || `Sunucu hatası: ${response.status}`);
+            }
+
+        } catch (error) {
+            // This catches network errors or errors thrown from the block above.
+            lastError = error instanceof Error ? error : new Error('Bilinmeyen bir ağ hatası oluştu.');
+            
+            // If it's a non-retryable error caught here, break the loop to fail fast.
+            const isRetryable = lastError.message.includes("meşgul") || lastError.message.includes("overloaded");
+            if (!isRetryable) {
+                break; 
+            }
         }
-
-        return await response.json() as T;
-
-    } catch (error) {
-        console.error(`API Error at '${endpoint}':`, error);
-        const errorMessage = error instanceof Error ? error.message : 'Bilinmeyen bir ağ hatası oluştu.';
-        // Prepend the generic message to provide context to the user.
-        throw new Error(`Analiz sunucusuna bağlanırken bir hata oluştu: ${errorMessage}`);
+        
+        // If we are here, it means a retryable error occurred.
+        // Wait before the next attempt, but not after the last one.
+        if (attempt < MAX_RETRIES - 1) {
+            // Exponential backoff with jitter: 2^attempt * initial_delay + random_offset
+            const delay = INITIAL_BACKOFF_MS * Math.pow(2, attempt) + Math.random() * 1000;
+            const progressMessage = `AI modeli meşgul. ${Math.round(delay / 1000)} saniye içinde yeniden denenecek... (${attempt + 1}/${MAX_RETRIES - 1})`;
+            
+            if (onProgress) {
+                onProgress(progressMessage);
+            }
+            console.warn(progressMessage);
+            
+            await new Promise(resolve => setTimeout(resolve, delay));
+        }
     }
+    
+    // If all retries have been exhausted, throw the last captured error.
+    console.error(`API Error at '${endpoint}' after ${MAX_RETRIES} attempts:`, lastError);
+    throw new Error(`Analiz sunucusuna bağlanılamadı. Lütfen daha sonra tekrar deneyin. Son hata: ${lastError?.message}`);
 }
 
 
@@ -40,7 +86,8 @@ export const performFullAnalysis = async (
     // The backend now handles all analysis types in a single, efficient call to prevent rate-limiting.
     const analysisResults = await callApi<Omit<AnalysisData, 'dashboard' | 'gelirGiderAnalizi' | 'dataSourceText'>>(
         `/api/analyze`, 
-        { dataSourceText } // The analysisType parameter is no longer needed.
+        { dataSourceText },
+        onProgress // Pass onProgress to the API caller for retry messages
     );
     
     onProgress("Analiz sonuçları birleştiriliyor...");
@@ -93,6 +140,7 @@ export const generateDetailedTaxReport = async (
     items: VergiselAnalizItem[],
     dataSourceText: string
 ): Promise<DetailedTaxReportItem[]> => {
+    // This call will also benefit from the retry logic, but without progress updates.
     const reportData = await callApi<DetailedTaxReportItem[]>('/api/generate-tax-report', { items, dataSourceText });
     return reportData;
 };
