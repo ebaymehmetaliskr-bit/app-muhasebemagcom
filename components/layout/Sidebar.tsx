@@ -5,7 +5,7 @@ import { Page } from '../../types';
 import { 
     DashboardIcon, MizanIcon, BilancoIcon, GelirGiderIcon, RasyoIcon, 
     DikeyAnalizIcon, YatayAnalizIcon, VergiselAnalizIcon, DevirHizlariIcon, 
-    KurganAnaliziIcon, NakitAkimIcon, KKEGIcon, CalculatorIcon 
+    KurganAnaliziIcon, NakitAkimIcon, KKEGIcon, CalculatorIcon, IndustryIcon 
 } from '../ui/Icons';
 
 interface SidebarProps {
@@ -26,6 +26,7 @@ const sidebarItems: { name: Page; icon: React.FC<any> }[] = [
   { name: 'Kârlılık Oranları', icon: RasyoIcon },
   { name: 'Dikey Analiz', icon: DikeyAnalizIcon },
   { name: 'Yatay Analiz', icon: YatayAnalizIcon },
+  { name: 'Sektör Karşılaştırma', icon: IndustryIcon },
   { name: 'Vergisel Analiz', icon: VergiselAnalizIcon },
   { name: 'KKEG Analizi', icon: KKEGIcon },
   { name: 'Kurgan Analizi', icon: KurganAnaliziIcon },

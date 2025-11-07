@@ -12,6 +12,7 @@ export type Page =
   | 'Kârlılık Oranları'
   | 'Dikey Analiz'
   | 'Yatay Analiz'
+  | 'Sektör Karşılaştırma'
   | 'Kurumlar Vergisi'
   | 'Vergisel Analiz'
   | 'KKEG Analizi'
@@ -179,6 +180,19 @@ export interface KurumlarVergisiHesaplama {
     mahsupEdilecekVergiler: number;
     odenmesiGerekenKV: number;
     sonrakiYilaDevredenKV: number;
+}
+
+export interface IndustryRatio {
+    name: string;
+    companyValue: number;
+    industryAverage: number;
+    interpretation: string;
+}
+
+export interface IndustryComparisonData {
+    industryName: string;
+    summary: string;
+    ratios: IndustryRatio[];
 }
 
 

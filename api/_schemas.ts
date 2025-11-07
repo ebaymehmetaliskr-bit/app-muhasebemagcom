@@ -303,6 +303,28 @@ export const vatValuesSchema = {
     required: ['devredenKDV', 'hesaplananKDV']
 };
 
+export const industryComparisonSchema = {
+    type: Type.OBJECT,
+    properties: {
+        industryName: { type: Type.STRING, description: "The most likely industry for the company (e.g., 'Üretim', 'Perakende Ticaret', 'Teknoloji')." },
+        summary: { type: Type.STRING, description: "A comprehensive analysis comparing the company's performance against industry averages, highlighting strengths and weaknesses." },
+        ratios: {
+            type: Type.ARRAY,
+            items: {
+                type: Type.OBJECT,
+                properties: {
+                    name: { type: Type.STRING, description: "The name of the financial ratio." },
+                    companyValue: { type: Type.NUMBER, description: "The company's value for this ratio." },
+                    industryAverage: { type: Type.NUMBER, description: "The typical industry average for this ratio." },
+                    interpretation: { type: Type.STRING, description: "A brief, insightful interpretation of how the company's ratio compares to the industry average." }
+                },
+                required: ['name', 'companyValue', 'industryAverage', 'interpretation']
+            }
+        }
+    },
+    required: ['industryName', 'summary', 'ratios']
+};
+
 export const fullAnalysisSchema = {
     type: Type.OBJECT,
     properties: {

@@ -23,6 +23,7 @@ import { KarlilikOranlari } from './KarlilikOranlari';
 import { KurumlarVergisi } from './KurumlarVergisi';
 import { processExcelFile } from '../utils/excelParser';
 import { mockAnalysisData } from '../data/mockAnalysisData';
+import { SektorKarsilastirma } from './SektorKarsilastirma';
 
 
 async function extractTextFromPdf(file: File, onProgress: (progress: number) => void): Promise<string> {
@@ -85,7 +86,7 @@ export const MainApp: React.FC = () => {
             
             const data = await performFullAnalysis(dataSourceText, setAnalysisStep, initialMizan);
             setAnalysisData(data);
-            setCurrentPage('Dashboard');
+            setCurrentPage('Kurgan Analizi');
 
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Analiz sırasında bilinmeyen bir hata oluştu.');
@@ -97,7 +98,7 @@ export const MainApp: React.FC = () => {
     
     const handleUseMockData = useCallback(() => {
         setAnalysisData(mockAnalysisData);
-        setCurrentPage('Dashboard');
+        setCurrentPage('Kurgan Analizi');
     }, []);
 
     const resetAnalysis = () => {
@@ -138,6 +139,8 @@ export const MainApp: React.FC = () => {
                 return <DikeyAnaliz bilancoData={analysisData.bilanco} gelirGiderData={analysisData.gelirGider} />;
             case 'Yatay Analiz':
                 return <YatayAnaliz bilancoData={analysisData.bilanco} gelirGiderData={analysisData.gelirGider} />;
+            case 'Sektör Karşılaştırma':
+                return <SektorKarsilastirma analysisData={analysisData} />;
             case 'Kurumlar Vergisi':
                 return <KurumlarVergisi data={analysisData.kurumlarVergisi} />;
             case 'Vergisel Analiz':
