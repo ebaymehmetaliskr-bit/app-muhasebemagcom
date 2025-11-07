@@ -6,11 +6,11 @@ export const mockAnalysisData: AnalysisData = {
   dataSourceText: 'Bu alanda analiz edilen PDF dosyasının tam metni yer alacaktır. Detaylı raporlama gibi özellikler bu metni bağlam olarak kullanır.',
   dashboard: {
     summary: {
-      mizan: 89,
-      bilanco: 77,
-      gelirGider: 15,
-      analizler: 21,
-      kkeg: 4,
+      mizan: 7,
+      bilanco: 8,
+      gelirGider: 8,
+      analizler: 1,
+      kkeg: 1,
     },
     aktifYapi: [
       { name: 'Dönen Varlıklar', value: 106063019.43 },

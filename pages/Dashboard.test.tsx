@@ -9,16 +9,19 @@ describe('Dashboard Component', () => {
 
     // Check for summary card titles and values
     expect(screen.getByText('Mizan')).toBeInTheDocument();
-    expect(screen.getByText('89')).toBeInTheDocument();
+    expect(screen.getByText('7')).toBeInTheDocument();
 
     expect(screen.getByText('Bilanço')).toBeInTheDocument();
-    expect(screen.getByText('77')).toBeInTheDocument();
+    expect(screen.getByText('8')).toBeInTheDocument();
 
     expect(screen.getByText('Gelir-Gider')).toBeInTheDocument();
-    expect(screen.getByText('33')).toBeInTheDocument();
+    expect(screen.getByText('8')).toBeInTheDocument();
 
-    expect(screen.getByText('Analizler')).toBeInTheDocument();
-    expect(screen.getByText('12')).toBeInTheDocument();
+    expect(screen.getByText('Vergi Analizi')).toBeInTheDocument();
+    expect(screen.getByText('1')).toBeInTheDocument();
+    
+    expect(screen.getByText('KKEG')).toBeInTheDocument();
+    expect(screen.getByText('1')).toBeInTheDocument();
   });
 
   it('should render all chart cards with correct titles', () => {

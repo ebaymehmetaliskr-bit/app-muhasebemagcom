@@ -12,8 +12,10 @@ async function callApi<T>(endpoint: string, body: object): Promise<T> {
         });
 
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({ message: response.statusText }));
-            throw new Error(errorData.message || `Sunucu hatası: ${response.status} - Endpoint: ${endpoint}`);
+            const errorData = await response.json().catch(() => ({ message: response.statusText, error: '' }));
+            // Backend returns { message, error }, let's combine them for a better client-side error.
+            const detailedError = errorData.error ? `${errorData.message} - Detay: ${errorData.error}` : errorData.message;
+            throw new Error(detailedError || `Sunucu hatası: ${response.status}`);
         }
 
         return await response.json() as T;
@@ -21,6 +23,7 @@ async function callApi<T>(endpoint: string, body: object): Promise<T> {
     } catch (error) {
         console.error(`API Error at '${endpoint}':`, error);
         const errorMessage = error instanceof Error ? error.message : 'Bilinmeyen bir ağ hatası oluştu.';
+        // Prepend the generic message to provide context to the user.
         throw new Error(`Analiz sunucusuna bağlanırken bir hata oluştu: ${errorMessage}`);
     }
 }
