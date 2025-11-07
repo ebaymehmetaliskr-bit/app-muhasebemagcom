@@ -302,3 +302,19 @@ export const vatValuesSchema = {
     },
     required: ['devredenKDV', 'hesaplananKDV']
 };
+
+export const fullAnalysisSchema = {
+    type: Type.OBJECT,
+    properties: {
+        mizan: mizanSchema,
+        bilanco: bilancoSchema,
+        gelirGider: gelirGiderSchema,
+        rasyolar: ratiosSchema,
+        vergiselAnaliz: vergiselAnalizSchema,
+        kkegAnalizi: kkegAnalizSchema,
+        kurganAnalizi: kurganAnalizSchema,
+        nakitAkim: nakitAkimSchema,
+        kurumlarVergisi: kurumlarVergisiSchema
+    },
+    required: ['mizan', 'bilanco', 'gelirGider', 'rasyolar', 'vergiselAnaliz', 'kkegAnalizi', 'kurganAnalizi', 'nakitAkim', 'kurumlarVergisi']
+};

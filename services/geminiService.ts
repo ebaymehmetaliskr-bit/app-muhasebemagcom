@@ -29,66 +29,44 @@ async function callApi<T>(endpoint: string, body: object): Promise<T> {
 }
 
 
-// This is the new orchestrator function
 export const performFullAnalysis = async (
     dataSourceText: string,
     onProgress: (message: string) => void,
-    initialMizan?: MizanItem[] // Optional pre-parsed mizan from Excel files
+    initialMizan?: MizanItem[]
 ): Promise<AnalysisData> => {
     
-    // If mizan data is provided from a pre-parsed Excel, we skip the mizan analysis step
-    const analysisSteps = [
-        ...(initialMizan ? [] : [{ type: 'mizan', message: 'Mizan verileri analiz ediliyor...' }]),
-        { type: 'bilanco', message: 'Bilanço oluşturuluyor...' },
-        { type: 'gelirGider', message: 'Gelir-Gider tablosu çıkarılıyor...' },
-        { type: 'rasyolar', message: 'Finansal rasyolar hesaplanıyor...' },
-        { type: 'vergiselAnaliz', message: 'Vergisel riskler taranıyor...' },
-        { type: 'kkeg', message: 'Kanunen Kabul Edilmeyen Giderler (KKEG) taranıyor...' },
-        { type: 'kurganAnalizi', message: 'Sahte belge (Kurgan) risk analizi yapılıyor...' },
-        { type: 'nakitAkim', message: 'Nakit akım tablosu hazırlanıyor...' },
-        { type: 'kurumlarVergisi', message: 'Kurumlar Vergisi hesaplanıyor...' },
-    ];
-    
-    onProgress("Tüm analizler paralel olarak başlatılıyor...");
-    
-    const promises = analysisSteps.map(step => 
-        callApi(`/api/analyze`, { dataSourceText, analysisType: step.type })
+    onProgress("Kapsamlı finansal analiz yapılıyor...");
+
+    // The backend now handles all analysis types in a single, efficient call to prevent rate-limiting.
+    const analysisResults = await callApi<Omit<AnalysisData, 'dashboard' | 'gelirGiderAnalizi' | 'dataSourceText'>>(
+        `/api/analyze`, 
+        { dataSourceText } // The analysisType parameter is no longer needed.
     );
-
-    const promiseResults = await Promise.all(promises);
-
+    
     onProgress("Analiz sonuçları birleştiriliyor...");
 
-    const results: { [key: string]: any } = {};
+    let mizanData = analysisResults.mizan;
+
+    // If mizan was pre-parsed from Excel, overwrite the AI-generated one to ensure 100% accuracy.
     if (initialMizan) {
-        results.mizan = initialMizan;
+        mizanData = initialMizan;
     }
 
-    promiseResults.forEach((res, index) => {
-        results[analysisSteps[index].type] = res;
-    });
-
-
-    const mizanData = results.mizan as MizanItem[];
-    const bilancoData = results.bilanco as BilancoData;
-    const gelirGiderData = results.gelirGider as GelirGiderItem[];
-    const rasyolarData = results.rasyolar as RasyoData;
-    const vergiselAnalizData = results.vergiselAnaliz as VergiselAnalizItem[];
-    const kkegAnalizData = results.kkeg as KKEGItem[];
-    const kurganAnalizData = results.kurganAnalizi as KurganAnaliz;
-    const nakitAkimData = results.nakitAkim as NakitAkimData;
-    const kurumlarVergisiData = results.kurumlarVergisi as KurumlarVergisiHesaplama;
+    const bilancoData = analysisResults.bilanco as BilancoData;
+    const gelirGiderData = analysisResults.gelirGider as GelirGiderItem[];
     
-    // Assemble the final JSON object
+    // Assemble the final JSON object, including derived dashboard data.
     const finalAnalysisData: AnalysisData = {
+        ...analysisResults,
         dataSourceText,
+        mizan: mizanData,
         dashboard: {
             summary: {
                 mizan: mizanData.length,
                 bilanco: bilancoData.aktif.flatMap(b => b.stoklar).length + bilancoData.pasif.flatMap(b => b.stoklar).length,
                 gelirGider: gelirGiderData.length,
-                analizler: vergiselAnalizData.length,
-                kkeg: kkegAnalizData.length,
+                analizler: analysisResults.vergiselAnaliz.length,
+                kkeg: analysisResults.kkegAnalizi.length,
             },
              aktifYapi: [
                 { name: 'Dönen Varlıklar', value: bilancoData.aktif.find(b => b.bolumAdi.includes("Dönen"))?.stoklar.reduce((sum, s) => sum + s.cariDonem, 0) || 0 },
@@ -100,20 +78,11 @@ export const performFullAnalysis = async (
                 { name: 'Özkaynaklar', value: bilancoData.pasif.find(b => b.bolumAdi.includes("Özkaynaklar"))?.stoklar.reduce((sum, s) => sum + s.cariDonem, 0) || 0 },
             ],
         },
-        mizan: mizanData,
-        bilanco: bilancoData,
-        gelirGider: gelirGiderData,
-        rasyolar: rasyolarData,
-        vergiselAnaliz: vergiselAnalizData,
         gelirGiderAnalizi: gelirGiderData.slice(0, 8).map(item => ({
             name: item.aciklama.toUpperCase(),
             'Cari Dönem': Math.abs(item.cariDonem),
             'Önceki Dönem': Math.abs(item.oncekiDonem),
         })),
-        kkegAnalizi: kkegAnalizData,
-        kurganAnalizi: kurganAnalizData,
-        nakitAkim: nakitAkimData,
-        kurumlarVergisi: kurumlarVergisiData,
     };
 
     onProgress("Analiz tamamlandı!");
